@@ -1,0 +1,7 @@
+
+SELECT 21;
+SELECT 22;
+
+-- DOWN
+
+SELECT 20;
