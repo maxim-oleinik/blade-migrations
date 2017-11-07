@@ -1,7 +1,7 @@
+--UP
+M2: UP-1;
+M2: UP-2;
 
-SELECT 21;
-SELECT 22;
-
--- DOWN
-
-SELECT 20;
+--DOWN
+M2: DOWN-1;
+M2: DOWN-2;

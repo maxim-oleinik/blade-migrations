@@ -2,7 +2,6 @@
 
 use Migrator;
 
-
 class MigratorTest extends \PHPUnit_Framework_TestCase
 {
     private $db;
@@ -74,6 +73,44 @@ class MigratorTest extends \PHPUnit_Framework_TestCase
                 'migration1.sql',
             ],
         ], $result);
+    }
+
+
+    /**
+     * UP command
+     */
+    public function testUpCommand()
+    {
+        $this->db->expects($this->exactly(2))
+           ->method('execute')
+            ->withConsecutive(['M2: UP-1'], ['M2: UP-2']);
+
+        $migrator = new Migrator(__DIR__ . '/fixtures', $this->db);
+        $migrator->setLogger($logger = new TestLogger);
+
+        $migrator->up('migration2.sql');
+        $this->assertEquals(['M2: UP-1', 'M2: UP-2'], $logger->getLog());
+    }
+
+
+    /**
+     * Down command
+     */
+    public function testDownCommand()
+    {
+        $this->db->expects($this->once())
+            ->method('select')
+            ->will($this->returnValue([['sql' => file_get_contents(__DIR__ . '/fixtures/migration2.sql')]]));
+
+        $this->db->expects($this->exactly(2))
+            ->method('execute')
+            ->withConsecutive(['M2: DOWN-1'], ['M2: DOWN-2']);
+
+        $migrator = new Migrator(__DIR__ . '/fixtures', $this->db);
+        $migrator->setLogger($logger = new TestLogger);
+
+        $migrator->down('migration2.sql');
+        $this->assertEquals(['M2: DOWN-1', 'M2: DOWN-2'], $logger->getLog());
     }
 
 }
