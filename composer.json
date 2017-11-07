@@ -1,0 +1,19 @@
+{
+  "name": "Migrations",
+  "description": "Database migration tool",
+  "require": {
+    "symfony/finder": "*",
+    "psr/log": "~1.0"
+  },
+  "require-dev": {
+  },
+  "repositories": [
+  ],
+  "autoload": {
+    "classmap": [
+      "src"
+    ],
+    "psr-4": {
+    }
+  }
+}
