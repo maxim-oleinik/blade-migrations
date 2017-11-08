@@ -65,7 +65,7 @@ class MigrateCommandTest extends \PHPUnit_Framework_TestCase
             ->method('all')
             ->will($this->returnValue([
                 new Migration(1, 'migration1.sql', null),
-                new Migration(3, 'migration3.sql', null, "--UP\n--DOWN\nM3: DOWN-1"),
+                new Migration(3, 'migration3.sql', null),
             ]));
 
         $migrator->migrate();

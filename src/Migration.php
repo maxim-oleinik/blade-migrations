@@ -25,18 +25,12 @@ class Migration
      * @param      $id
      * @param      $name
      * @param      $date
-     * @param      $sql
      */
-    public function __construct($id, $name, $date = null, $sql = null)
+    public function __construct($id, $name, $date = null)
     {
         $this->id = $id;
         $this->name = $name;
         $this->date = new \DateTime($date);
-
-        if (null === $sql) {
-            return;
-        }
-        $this->setSql($sql);
     }
 
 
@@ -58,8 +52,8 @@ class Migration
         }
 
         list($up, $down) = explode(self::TAG_DOWN, $sql);
-        $this->up = array_filter(array_map('trim', explode(';', trim($up))));
-        $this->down = array_filter(array_map('trim', explode(';', trim($down))));
+        $this->setUp($up);
+        $this->setDown($down);
     }
 
 
@@ -114,6 +108,28 @@ class Migration
         }
         return $this->isRemove;
     }
+
+    /**
+     * @param array $up
+     */
+    public function setUp($up)
+    {
+        $this->up = $this->_parse_sql($up);
+    }
+
+    /**
+     * @param array $down
+     */
+    public function setDown($down)
+    {
+        $this->down = $this->_parse_sql($down);
+    }
+
+    private function _parse_sql($sql)
+    {
+        return array_filter(array_map('trim', explode(';', trim($sql))));
+    }
+
 
     /**
      * @return array

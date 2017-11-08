@@ -43,7 +43,7 @@ class MigratorTest extends \PHPUnit_Framework_TestCase
             'BEGIN',
             'M2: UP-1',
             'M2: UP-2',
-            "INSERT INTO table_name (name, sql) VALUES ('migration2.sql', '".trim(file_get_contents(__DIR__.'/fixtures/migration2.sql'))."')",
+            "INSERT INTO table_name (name, down) VALUES ('migration2.sql', 'M2: DOWN-1;\nM2: DOWN-2')",
             'COMMIT',
         ], $this->repository->getAdapter()->log);
     }
@@ -82,15 +82,14 @@ class MigratorTest extends \PHPUnit_Framework_TestCase
         $m = new Migration(2, 'migration2.sql');
 
         $this->repository->getAdapter()->returnValue = [
-            [file_get_contents(__DIR__.'/fixtures/migration2.sql')],
+            ['M2: DOWN'],
         ];
         $migrator->down($m);
-        $this->assertEquals(['M2: DOWN-1', 'M2: DOWN-2'], $logger->getLog());
+        $this->assertEquals(['M2: DOWN'], $logger->getLog());
 
         $this->assertEquals([
             'BEGIN',
-            'M2: DOWN-1',
-            'M2: DOWN-2',
+            'M2: DOWN',
             "DELETE FROM table_name WHERE id='2'",
             'COMMIT',
         ], $this->repository->getAdapter()->log);

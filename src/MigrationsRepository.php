@@ -47,7 +47,7 @@ class MigrationsRepository
               id serial NOT NULL,
               created_at timestamp (0) without time zone NOT NULL DEFAULT now(),
               name character varying (255) NOT NULL,
-              sql TEXT NOT NULL
+              down TEXT NOT NULL
             );
         ";
 
@@ -79,13 +79,10 @@ class MigrationsRepository
      */
     public function insert(Migration $migration)
     {
-        if (!$migration->getSql()) {
-            throw new \InvalidArgumentException(__METHOD__.": Expected migration contains SQL data");
-        }
-
-        $sql = sprintf("INSERT INTO {$this->tableName} (name, sql) VALUES ('%s', '%s')",
+        $sql = sprintf("INSERT INTO {$this->tableName} (name, down) VALUES ('%s', '%s')",
             $this->adapter->escape($migration->getName()),
-            $this->adapter->escape($migration->getSql()));
+            $this->adapter->escape(implode(";\n", $migration->getDown()))
+        );
 
         $this->getAdapter()->execute($sql);
     }
@@ -110,13 +107,13 @@ class MigrationsRepository
      */
     public function loadSql(Migration $migration)
     {
-        $data = $this->adapter->selectList(sprintf("SELECT sql FROM {$this->tableName} WHERE name='%s' LIMIT 1", $this->adapter->escape($migration->getName())));
+        $data = $this->adapter->selectList(sprintf("SELECT down FROM {$this->tableName} WHERE name='%s' LIMIT 1", $this->adapter->escape($migration->getName())));
         if (!$data) {
             throw new \InvalidArgumentException(__METHOD__.": migration `{$migration->getName()}` not found DOWN data in Database");
         }
 
         $row = (array)current($data);
-        $migration->setSql(current($row));
+        $migration->setDown(current($row));
     }
 
 }
