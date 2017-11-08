@@ -7,7 +7,7 @@ use Usend\Migrations\Migrator;
 /**
  * @see \Usend\Migrations\Migrator
  */
-class MigratorStatusTest extends \PHPUnit_Framework_TestCase
+class MigrateStatusTest extends \PHPUnit_Framework_TestCase
 {
     private $repository;
 
@@ -26,12 +26,13 @@ class MigratorStatusTest extends \PHPUnit_Framework_TestCase
     public function testStatusNoMigrations()
     {
         $migrator = new Migrator(__DIR__ . '/fixtures/empty_dir', $this->repository);
-        $this->repository->expects($this->once())
+        $this->repository->expects($this->any())
             ->method('items')
             ->will($this->returnValue([]));
 
         $result = $migrator->status();
         $this->assertSame([], $result, 'Нет ничего');
+        $this->assertSame([], $migrator->getDiff());
     }
 
 
@@ -42,15 +43,17 @@ class MigratorStatusTest extends \PHPUnit_Framework_TestCase
     {
         $migrator = new Migrator(__DIR__ . '/fixtures', $this->repository);
 
-        $this->repository->expects($this->once())
+        $this->repository->expects($this->any())
             ->method('items')
             ->will($this->returnValue([]));
 
         $result = $migrator->status();
         $this->assertEquals([
-            new Migration(null, 'migration1.sql', null),
-            new Migration(null, 'migration2.sql', null),
+            $m1 = new Migration(null, 'migration1.sql', null),
+            $m2 = new Migration(null, 'migration2.sql', null),
         ], $result);
+
+        $this->assertEquals([$m1, $m2], $migrator->getDiff());
     }
 
 
@@ -60,7 +63,7 @@ class MigratorStatusTest extends \PHPUnit_Framework_TestCase
     public function testStatusAll()
     {
         // В базе зафиксированы 2 миграции
-        $this->repository->expects($this->once())
+        $this->repository->expects($this->any())
             ->method('items')
             ->will($this->returnValue([
                 $m1 = new Migration(1, 'migration1.sql', null),
@@ -76,8 +79,10 @@ class MigratorStatusTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals([
             $m11, // уже применена
             $m33, // удалить
-            new Migration(null, 'migration2.sql', null), // новая
+            $m2 = new Migration(null, 'migration2.sql', null), // новая
         ], $result);
+
+        $this->assertEquals([$m3, $m2], $migrator->getDiff());
     }
 
 }

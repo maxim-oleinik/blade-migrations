@@ -1,6 +1,5 @@
 <?php namespace Usend\Migrations\Test;
 
-use Usend\Migrations\DbAdapterInterface;
 use Usend\Migrations\Migration;
 use Usend\Migrations\MigrationsRepository;
 use Usend\Migrations\Migrator;
@@ -8,10 +7,8 @@ use Usend\Migrations\Migrator;
 
 /**
  * @see \Usend\Migrations\Migrator
- *
- * транзакцию
  */
-class MigratorTest extends \PHPUnit_Framework_TestCase
+class MigrateUpDownTest extends \PHPUnit_Framework_TestCase
 {
     /**
      * @var MigrationsRepository

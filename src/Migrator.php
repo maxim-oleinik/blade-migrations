@@ -4,9 +4,8 @@ use Psr\Log\LoggerInterface;
 
 
 /**
- * @see \Usend\Migrations\Test\MigratorStatusTest
- * @see \Usend\Migrations\Test\MigratorTest
- * @see \Usend\Migrations\Test\MigrateCommandTest
+ * @see \Usend\Migrations\Test\MigrateStatusTest
+ * @see \Usend\Migrations\Test\MigrateUpDownTest
  */
 class Migrator implements \Psr\Log\LoggerAwareInterface
 {
@@ -62,9 +61,15 @@ class Migrator implements \Psr\Log\LoggerAwareInterface
      */
     public function status()
     {
-        $migrations = $this->repository->items();
-        $found = $this->_get_migrations_list();
+        // Найти все файлы миграций
+        $finder = new \Symfony\Component\Finder\Finder;
+        $finder->files()->in($this->migrationsDir);
+        $found = [];
+        foreach ($finder as $file) {
+            $found[$file->getBasename()] = $file->getPath();
+        }
 
+        $migrations = $this->repository->items();
         $nameIndex = [];
         foreach ($migrations as $migration) {
             $nameIndex[$migration->getName()] = $migration;
@@ -98,48 +103,6 @@ class Migrator implements \Psr\Log\LoggerAwareInterface
         }
 
         return array_merge($down, $up);
-    }
-
-
-    /**
-     *
-     */
-    public function migrate()
-    {
-        $migrations = $this->status();
-        if (empty($migrations['up']) && empty($migrations['down'])) {
-            $this->logger->notice('Nothing to migrate');
-            return;
-        }
-
-        if (!empty($migrations['down'])) {
-            foreach ($migrations['down'] as $migrationName) {
-                $this->down($migrationName);
-            }
-        }
-
-        if (!empty($migrations['up'])) {
-            foreach ($migrations['up'] as $migrationName) {
-                $this->up($migrationName);
-            }
-        }
-    }
-
-
-    /**
-     * @return array
-     */
-    private function _get_migrations_list()
-    {
-        $finder = new \Symfony\Component\Finder\Finder;
-        $finder->files()->in($this->migrationsDir);
-
-        $result = [];
-        foreach ($finder as $file) {
-            $result[$file->getBasename()] = $file->getPath();
-        }
-
-        return $result;
     }
 
 
