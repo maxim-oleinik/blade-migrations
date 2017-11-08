@@ -1,5 +1,6 @@
 <?php namespace Usend\Migrations\Test;
 
+use Usend\Migrations\DbAdapterInterface;
 use Usend\Migrations\Migration;
 use Usend\Migrations\MigrationsRepository;
 use Usend\Migrations\Migrator;
@@ -7,9 +8,14 @@ use Usend\Migrations\Migrator;
 
 /**
  * @see \Usend\Migrations\Migrator
+ *
+ * транзакцию
  */
 class MigratorTest extends \PHPUnit_Framework_TestCase
 {
+    /**
+     * @var MigrationsRepository
+     */
     private $repository;
 
     /**
@@ -17,7 +23,8 @@ class MigratorTest extends \PHPUnit_Framework_TestCase
      */
     protected function setUp()
     {
-        $this->repository = $this->createMock(MigrationsRepository::class);
+        $adapter = new TestDbAdapter;
+        $this->repository = new MigrationsRepository('table_name', $adapter);
     }
 
 
@@ -26,17 +33,17 @@ class MigratorTest extends \PHPUnit_Framework_TestCase
      */
     public function testUpCommand()
     {
-        $this->markTestIncomplete();
-
         $migrator = new Migrator(__DIR__ . '/fixtures', $this->repository);
         $migrator->setLogger($logger = new TestLogger);
 
-        $this->repository->expects($this->once())
-            ->method('all')
-            ->will($this->returnValue([]));
-
-        $migrator->up(new Migration(null, 'migration2.sql', null));
+        $migrator->up(new Migration(null, 'migration2.sql'));
         $this->assertEquals(['M2: UP-1', 'M2: UP-2'], $logger->getLog());
+
+        $this->assertEquals([
+            'M2: UP-1',
+            'M2: UP-2',
+            "INSERT INTO table_name (name, sql) VALUES ('migration2.sql', '".trim(file_get_contents(__DIR__.'/fixtures/migration2.sql'))."')",
+        ], $this->repository->getAdapter()->log);
     }
 
 
@@ -45,20 +52,22 @@ class MigratorTest extends \PHPUnit_Framework_TestCase
      */
     public function testDownCommand()
     {
-        $this->markTestIncomplete();
-
         $migrator = new Migrator(__DIR__ . '/fixtures', $this->repository);
         $migrator->setLogger($logger = new TestLogger);
 
-        $this->repository->expects($this->once())
-            ->method('all')
-            ->will($this->returnValue([]));
+        $m = new Migration(2, 'migration2.sql');
 
-        $m = new Migration(2, 'migration2.sql', null);
-        $m->setSql(file_get_contents(__DIR__ . '/fixtures/migration2.sql'));
-
+        $this->repository->getAdapter()->returnValue = [
+            [file_get_contents(__DIR__.'/fixtures/migration2.sql')],
+        ];
         $migrator->down($m);
         $this->assertEquals(['M2: DOWN-1', 'M2: DOWN-2'], $logger->getLog());
+
+        $this->assertEquals([
+            'M2: DOWN-1',
+            'M2: DOWN-2',
+            "DELETE FROM table_name WHERE id='2'",
+        ], $this->repository->getAdapter()->log);
     }
 
 }

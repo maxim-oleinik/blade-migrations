@@ -27,7 +27,7 @@ class Migration
      * @param      $date
      * @param      $sql
      */
-    public function __construct($id, $name, $date, $sql = null)
+    public function __construct($id, $name, $date = null, $sql = null)
     {
         $this->id = $id;
         $this->name = $name;

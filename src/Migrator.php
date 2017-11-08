@@ -142,17 +142,33 @@ class Migrator implements \Psr\Log\LoggerAwareInterface
         return $result;
     }
 
+
     /**
-     * @param \Usend\Migrations\Migration $migration
+     * UP
+     *
+     * @param Migration $migration
      */
     public function up(Migration $migration)
     {
-        $this->_make_migration($migration);
+        if (!$migration->isNew()) {
+            throw new \InvalidArgumentException(__METHOD__.": Expected NEW migration");
+        }
+
+        // Загрузить SQL
+        $fileName = $this->migrationsDir . DIRECTORY_SEPARATOR . $migration->getName();
+        if (!is_file($fileName)) {
+            throw new \InvalidArgumentException(__METHOD__.": migration file `{$migration->getName()}` not found in dir `{$this->migrationsDir}`");
+        }
+        $migration->setSql(file_get_contents($fileName));
+
         foreach ($migration->getUp() as $sql) {
             $this->logger->info($sql);
             $this->repository->getAdapter()->execute($sql);
         }
+
+        $this->repository->insert($migration);
     }
+
 
     /**
      * @param \Usend\Migrations\Migration $migration
@@ -165,20 +181,8 @@ class Migrator implements \Psr\Log\LoggerAwareInterface
             $this->logger->info($sql);
             $this->repository->getAdapter()->execute($sql);
         }
-    }
 
-    /**
-     * @param $migration
-     */
-    private function _make_migration(Migration $migration)
-    {
-        // получить миграцию
-        $fileName = $this->migrationsDir . DIRECTORY_SEPARATOR . $migration->getName();
-        if (!is_file($fileName)) {
-            throw new \InvalidArgumentException(__METHOD__.": migration file `{$migration->getName()}` not found in dir `{$this->migrationsDir}`");
-        }
-
-        $migration->setSql(file_get_contents($fileName));
+        $this->repository->delete($migration);
     }
 
 }

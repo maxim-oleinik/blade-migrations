@@ -6,10 +6,10 @@ interface DbAdapterInterface
     /**
      * Escape special chars
      *
-     * @param  string $sql
+     * @param  string $value
      * @return string
      */
-    public function escape($sql);
+    public function escape($value);
 
 
     /**

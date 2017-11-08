@@ -79,6 +79,10 @@ class MigrationsRepository
      */
     public function insert(Migration $migration)
     {
+        if (!$migration->getSql()) {
+            throw new \InvalidArgumentException(__METHOD__.": Expected migration contains SQL data");
+        }
+
         $sql = sprintf("INSERT INTO {$this->tableName} (name, sql) VALUES ('%s', '%s')",
             $this->adapter->escape($migration->getName()),
             $this->adapter->escape($migration->getSql()));
