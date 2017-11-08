@@ -60,14 +60,22 @@ class MigrationsRepository
      *
      * @return Migration[]
      */
-    public function all()
+    public function items($limit = null)
     {
+        if ($limit) {
+            $limit = ' LIMIT ' . $limit;
+        }
+        $sql ="SELECT id, name, created_at FROM {$this->tableName} ORDER BY id DESC" . $limit;
+        $data = $this->adapter->selectList($sql);
+
         $result = [];
-        $data = $this->adapter->selectList($sql ="SELECT id, name, created_at FROM {$this->tableName} ORDER BY id");
         foreach ($data as $row) {
             $row = array_values((array)$row);
             $result[] = new Migration($row[0], $row[1], $row[2]);
         }
+        // Сортировать по возрастанию
+        rsort($result);
+
         return $result;
     }
 

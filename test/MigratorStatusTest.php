@@ -27,7 +27,7 @@ class MigratorStatusTest extends \PHPUnit_Framework_TestCase
     {
         $migrator = new Migrator(__DIR__ . '/fixtures/empty_dir', $this->repository);
         $this->repository->expects($this->once())
-            ->method('all')
+            ->method('items')
             ->will($this->returnValue([]));
 
         $result = $migrator->status();
@@ -43,7 +43,7 @@ class MigratorStatusTest extends \PHPUnit_Framework_TestCase
         $migrator = new Migrator(__DIR__ . '/fixtures', $this->repository);
 
         $this->repository->expects($this->once())
-            ->method('all')
+            ->method('items')
             ->will($this->returnValue([]));
 
         $result = $migrator->status();
@@ -61,7 +61,7 @@ class MigratorStatusTest extends \PHPUnit_Framework_TestCase
     {
         // В базе зафиксированы 2 миграции
         $this->repository->expects($this->once())
-            ->method('all')
+            ->method('items')
             ->will($this->returnValue([
                 $m1 = new Migration(1, 'migration1.sql', null),
                 $m3 = new Migration(3, 'migration3.sql', null),

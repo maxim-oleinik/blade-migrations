@@ -26,7 +26,7 @@ class MigrateCommandTest extends \PHPUnit_Framework_TestCase
         $migrator->setLogger($logger = new TestLogger());
 
         $this->repository->expects($this->once())
-            ->method('all')
+            ->method('items')
             ->will($this->returnValue([]));
 
         $result = $migrator->migrate();
@@ -41,7 +41,7 @@ class MigrateCommandTest extends \PHPUnit_Framework_TestCase
 
         // В базе зафиксированы 2 миграции
         $this->repository->expects($this->once())
-            ->method('all')
+            ->method('items')
             ->will($this->returnValue([
                 new Migration(1, 'migration1.sql', null),
                 new Migration(2, 'migration2.sql', null),
@@ -62,7 +62,7 @@ class MigrateCommandTest extends \PHPUnit_Framework_TestCase
 
         // В базе зафиксированы 2 миграции
         $this->repository->expects($this->once())
-            ->method('all')
+            ->method('items')
             ->will($this->returnValue([
                 new Migration(1, 'migration1.sql', null),
                 new Migration(3, 'migration3.sql', null),

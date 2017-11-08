@@ -62,7 +62,7 @@ class Migrator implements \Psr\Log\LoggerAwareInterface
      */
     public function status()
     {
-        $migrations = $this->repository->all();
+        $migrations = $this->repository->items();
         $found = $this->_get_migrations_list();
 
         $nameIndex = [];
