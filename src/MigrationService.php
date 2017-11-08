@@ -7,7 +7,7 @@ use Psr\Log\LoggerInterface;
  * @see \Usend\Migrations\Test\MigrateStatusTest
  * @see \Usend\Migrations\Test\MigrateUpDownTest
  */
-class Migrator implements \Psr\Log\LoggerAwareInterface
+class MigrationService implements \Psr\Log\LoggerAwareInterface
 {
     /**
      * @var string

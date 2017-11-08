@@ -2,10 +2,10 @@
 
 use Usend\Migrations\Migration;
 use Usend\Migrations\MigrationsRepository;
-use Usend\Migrations\Migrator;
+use Usend\Migrations\MigrationService;
 
 /**
- * @see \Usend\Migrations\Migrator
+ * @see \Usend\Migrations\MigrationService
  */
 class MigrateStatusTest extends \PHPUnit_Framework_TestCase
 {
@@ -25,7 +25,7 @@ class MigrateStatusTest extends \PHPUnit_Framework_TestCase
      */
     public function testStatusNoMigrations()
     {
-        $migrator = new Migrator(__DIR__ . '/fixtures/empty_dir', $this->repository);
+        $migrator = new MigrationService(__DIR__ . '/fixtures/empty_dir', $this->repository);
         $this->repository->expects($this->any())
             ->method('items')
             ->will($this->returnValue([]));
@@ -41,7 +41,7 @@ class MigrateStatusTest extends \PHPUnit_Framework_TestCase
      */
     public function testStatusUp()
     {
-        $migrator = new Migrator(__DIR__ . '/fixtures', $this->repository);
+        $migrator = new MigrationService(__DIR__ . '/fixtures', $this->repository);
 
         $this->repository->expects($this->any())
             ->method('items')
@@ -73,7 +73,7 @@ class MigrateStatusTest extends \PHPUnit_Framework_TestCase
         $m33 = clone $m3;
         $m33->isRemove(true);
 
-        $migrator = new Migrator(__DIR__ . '/fixtures', $this->repository);
+        $migrator = new MigrationService(__DIR__ . '/fixtures', $this->repository);
         $result = $migrator->status();
         // Накатить М2 и откатить М3
         $this->assertEquals([
