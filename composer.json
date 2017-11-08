@@ -10,13 +10,9 @@
   "repositories": [
   ],
   "autoload": {
-    "classmap": [
-      "src"
-    ],
     "psr-4": {
       "Usend\\Migrations\\": "src",
-      "Usend\\Migrations\\Test\\": "test/lib",
-      "Test\\": "test/lib"
+      "Usend\\Migrations\\Test\\": "test/lib"
     }
   }
 }

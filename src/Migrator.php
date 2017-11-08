@@ -1,9 +1,18 @@
-<?php
+<?php namespace Usend\Migrations;
 
 use Psr\Log\LoggerInterface;
 
+
+/**
+ * @see \Usend\Migrations\Test\MigratorStatusTest
+ * @see \Usend\Migrations\Test\MigratorTest
+ * @see \Usend\Migrations\Test\MigrateCommandTest
+ */
 class Migrator implements \Psr\Log\LoggerAwareInterface
 {
+    /**
+     * @var string
+     */
     private $migrationsDir;
 
     /**
@@ -12,62 +21,89 @@ class Migrator implements \Psr\Log\LoggerAwareInterface
     private $logger;
 
     /**
-     * @var \DbAdapterInterface
+     * @var MigrationsRepository
      */
-    private $db;
+    private $repository;
 
-    public function __construct($migrationsDir, DbAdapterInterface $db)
-    {
-        $this->migrationsDir = $migrationsDir;
-        $this->db = $db;
-    }
 
     /**
-     * Sets a logger instance on the object.
+     * Конструктор
      *
+     * @param string               $migrationsDir
+     * @param MigrationsRepository $repository
+     */
+    public function __construct($migrationsDir, MigrationsRepository $repository)
+    {
+        $this->migrationsDir = $migrationsDir;
+        $this->repository = $repository;
+    }
+
+
+    /**
+     * @return MigrationsRepository
+     */
+    public function getRepository()
+    {
+        return $this->repository;
+    }
+
+
+    /**
      * @param LoggerInterface $logger
-     *
-     * @return void
      */
     public function setLogger(LoggerInterface $logger)
     {
         $this->logger = $logger;
     }
 
+
+    /**
+     * @return Migration[]
+     */
     public function status()
     {
-        $result = [
-            'up'=>[],
-            'down'=>[],
-            'current'=>[],
-        ];
-
-        $applied = [];
-        $appliedResult = $this->db->select("SELECT name FROM _migrations ORDER BY id");
-        if ($appliedResult) {
-            foreach ($appliedResult as $row) {
-                $applied[$row['name']] = true;
-            }
-        }
-
+        $migrations = $this->repository->all();
         $found = $this->_get_migrations_list();
 
-        foreach ($applied as $name => $f) {
-            if (!isset($found[$name])) {
-                $result['down'][] = $name;
-            } else {
-                $result['current'][] = $name;
+        $nameIndex = [];
+        foreach ($migrations as $migration) {
+            $nameIndex[$migration->getName()] = $migration;
+            if (!isset($found[$migration->getName()])) {
+                $migration->isRemove(true);
             }
         }
 
         foreach ($found as $name => $path) {
-            if (!$result['current'] || !isset($applied[$name])) {
-                $result['up'][] = $name;
+            if (!isset($nameIndex[$name])) {
+                $migrations[] = new Migration(null, $name, null);
             }
         }
-        return $result;
+        return $migrations;
     }
 
+
+    /**
+     * @return Migration[]
+     */
+    public function getDiff()
+    {
+        $up = [];
+        $down = [];
+        foreach ($this->status() as $migration) {
+            if ($migration->isNew()) {
+                $up[] = $migration;
+            } else if ($migration->isRemove()) {
+                $down[] = $migration;
+            }
+        }
+
+        return array_merge($down, $up);
+    }
+
+
+    /**
+     *
+     */
     public function migrate()
     {
         $migrations = $this->status();
@@ -89,9 +125,13 @@ class Migrator implements \Psr\Log\LoggerAwareInterface
         }
     }
 
+
+    /**
+     * @return array
+     */
     private function _get_migrations_list()
     {
-        $finder = new Symfony\Component\Finder\Finder;
+        $finder = new \Symfony\Component\Finder\Finder;
         $finder->files()->in($this->migrationsDir);
 
         $result = [];
@@ -102,41 +142,43 @@ class Migrator implements \Psr\Log\LoggerAwareInterface
         return $result;
     }
 
-    public function up($migrationName)
+    /**
+     * @param \Usend\Migrations\Migration $migration
+     */
+    public function up(Migration $migration)
     {
-        $migration = $this->_make_migration($migrationName);
+        $this->_make_migration($migration);
         foreach ($migration->getUp() as $sql) {
             $this->logger->info($sql);
-            $this->db->execute($sql);
-        }
-    }
-
-    public function down($migrationName)
-    {
-        $data = $this->db->select(sprintf("SELECT sql FROM _migrations WHERE name='%s' LIMIT 1", $this->db->escape($migrationName)));
-        if (!$data) {
-            throw new InvalidArgumentException(__METHOD__.": migration `{$migrationName}` not found DOWN data in Database");
-        }
-
-        $migration = new Migration(current(current($data)));
-        foreach ($migration->getDown() as $sql) {
-            $this->logger->info($sql);
-            $this->db->execute($sql);
+            $this->repository->getAdapter()->execute($sql);
         }
     }
 
     /**
-     * @param $migrationName
-     * @return \Migration
+     * @param \Usend\Migrations\Migration $migration
      */
-    private function _make_migration($migrationName)
+    public function down(Migration $migration)
+    {
+        $this->repository->loadSql($migration);
+
+        foreach ($migration->getDown() as $sql) {
+            $this->logger->info($sql);
+            $this->repository->getAdapter()->execute($sql);
+        }
+    }
+
+    /**
+     * @param $migration
+     */
+    private function _make_migration(Migration $migration)
     {
         // получить миграцию
-        $fileName = $this->migrationsDir . DIRECTORY_SEPARATOR . $migrationName;
+        $fileName = $this->migrationsDir . DIRECTORY_SEPARATOR . $migration->getName();
         if (!is_file($fileName)) {
-            throw new InvalidArgumentException(__METHOD__.": migration file `{$migrationName}` not found in dir `{$this->migrationsDir}`");
+            throw new \InvalidArgumentException(__METHOD__.": migration file `{$migration->getName()}` not found in dir `{$this->migrationsDir}`");
         }
 
-        return new Migration(file_get_contents($fileName));
+        $migration->setSql(file_get_contents($fileName));
     }
+
 }
