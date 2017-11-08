@@ -1,6 +1,8 @@
 {
-  "name": "Migrations",
-  "description": "Database migration tool",
+  "name": "usend/migrations",
+  "description": "Raw SQL database migration tool for PHP app",
+  "keywords": ["migrations", "database", "db", "database migrations"],
+  "license": "MIT",
   "require": {
     "symfony/finder": "*",
     "psr/log": "~1.0"
@@ -11,7 +13,11 @@
   ],
   "autoload": {
     "psr-4": {
-      "Usend\\Migrations\\": "src",
+      "Usend\\Migrations\\": "src"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
       "Usend\\Migrations\\Test\\": "test/lib"
     }
   }
