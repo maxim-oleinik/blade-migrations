@@ -147,6 +147,7 @@ class Migrator implements \Psr\Log\LoggerAwareInterface
      * UP
      *
      * @param Migration $migration
+     * @throws \Exception
      */
     public function up(Migration $migration)
     {
@@ -161,12 +162,15 @@ class Migrator implements \Psr\Log\LoggerAwareInterface
         }
         $migration->setSql(file_get_contents($fileName));
 
-        foreach ($migration->getUp() as $sql) {
-            $this->logger->info($sql);
-            $this->repository->getAdapter()->execute($sql);
-        }
-
-        $this->repository->insert($migration);
+        $this->getRepository()->getAdapter()->transaction(function () use ($migration) {
+            foreach ($migration->getUp() as $sql) {
+                if ($this->logger) {
+                    $this->logger->info($sql);
+                }
+                $this->getRepository()->getAdapter()->execute($sql);
+            }
+            $this->getRepository()->insert($migration);
+        });
     }
 
 
@@ -177,12 +181,13 @@ class Migrator implements \Psr\Log\LoggerAwareInterface
     {
         $this->repository->loadSql($migration);
 
-        foreach ($migration->getDown() as $sql) {
-            $this->logger->info($sql);
-            $this->repository->getAdapter()->execute($sql);
-        }
-
-        $this->repository->delete($migration);
+        $this->getRepository()->getAdapter()->transaction(function () use ($migration) {
+            foreach ($migration->getDown() as $sql) {
+                $this->logger->info($sql);
+                $this->repository->getAdapter()->execute($sql);
+            }
+            $this->repository->delete($migration);
+        });
     }
 
 }

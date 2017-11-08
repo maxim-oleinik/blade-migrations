@@ -40,9 +40,33 @@ class MigratorTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(['M2: UP-1', 'M2: UP-2'], $logger->getLog());
 
         $this->assertEquals([
+            'BEGIN',
             'M2: UP-1',
             'M2: UP-2',
             "INSERT INTO table_name (name, sql) VALUES ('migration2.sql', '".trim(file_get_contents(__DIR__.'/fixtures/migration2.sql'))."')",
+            'COMMIT',
+        ], $this->repository->getAdapter()->log);
+    }
+
+
+    /**
+     * UP: Исключение в транзакции
+     */
+    public function testUpException()
+    {
+        $adapter = new TestDbAdapter;
+        $adapter->throwExceptionOnCallNum = 3;
+
+        $this->repository = new MigrationsRepository('table_name', $adapter);
+        $migrator = new Migrator(__DIR__ . '/fixtures', $this->repository);
+
+        $migrator->up(new Migration(null, 'migration2.sql'));
+
+        $this->assertEquals([
+            'BEGIN',
+            'M2: UP-1',
+            'M2: UP-2',
+            'ROLLBACK',
         ], $this->repository->getAdapter()->log);
     }
 
@@ -64,9 +88,11 @@ class MigratorTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(['M2: DOWN-1', 'M2: DOWN-2'], $logger->getLog());
 
         $this->assertEquals([
+            'BEGIN',
             'M2: DOWN-1',
             'M2: DOWN-2',
             "DELETE FROM table_name WHERE id='2'",
+            'COMMIT',
         ], $this->repository->getAdapter()->log);
     }
 

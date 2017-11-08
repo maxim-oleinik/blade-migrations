@@ -31,4 +31,13 @@ interface DbAdapterInterface
      *  ]
      */
     public function selectList($sql);
+
+
+    /**
+     * Выполнить указанную фукнцию в транзакции
+     * Откатить транзакцию при исключении
+     *
+     * @param callable $func
+     */
+    public function transaction(callable $func);
 }
