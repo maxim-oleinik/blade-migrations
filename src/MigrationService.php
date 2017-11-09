@@ -23,7 +23,7 @@ class MigrationService implements \Psr\Log\LoggerAwareInterface
     /**
      * @var DbRepository
      */
-    private $repository;
+    private $dbRepository;
 
 
     /**
@@ -35,16 +35,16 @@ class MigrationService implements \Psr\Log\LoggerAwareInterface
     public function __construct($migrationsDir, DbRepository $repository)
     {
         $this->migrationsDir = $migrationsDir;
-        $this->repository = $repository;
+        $this->dbRepository = $repository;
     }
 
 
     /**
      * @return DbRepository
      */
-    public function getRepository()
+    public function getDbRepository()
     {
-        return $this->repository;
+        return $this->dbRepository;
     }
 
 
@@ -70,7 +70,7 @@ class MigrationService implements \Psr\Log\LoggerAwareInterface
             $found[$file->getBasename()] = $file->getPath();
         }
 
-        $migrations = $this->repository->items();
+        $migrations = $this->dbRepository->items();
         $nameIndex = [];
         foreach ($migrations as $migration) {
             $nameIndex[$migration->getName()] = $migration;
@@ -126,14 +126,14 @@ class MigrationService implements \Psr\Log\LoggerAwareInterface
         }
         $migration->setSql(file_get_contents($fileName));
 
-        $this->getRepository()->getAdapter()->transaction(function () use ($migration) {
+        $this->getDbRepository()->getAdapter()->transaction(function () use ($migration) {
             foreach ($migration->getUp() as $sql) {
                 if ($this->logger) {
                     $this->logger->info($sql.PHP_EOL);
                 }
-                $this->getRepository()->getAdapter()->execute($sql);
+                $this->getDbRepository()->getAdapter()->execute($sql);
             }
-            $this->getRepository()->insert($migration);
+            $this->getDbRepository()->insert($migration);
         });
     }
 
@@ -143,16 +143,16 @@ class MigrationService implements \Psr\Log\LoggerAwareInterface
      */
     public function down(Migration $migration)
     {
-        $this->repository->loadSql($migration);
+        $this->dbRepository->loadSql($migration);
 
-        $this->getRepository()->getAdapter()->transaction(function () use ($migration) {
+        $this->getDbRepository()->getAdapter()->transaction(function () use ($migration) {
             foreach ($migration->getDown() as $sql) {
                 if ($this->logger) {
                     $this->logger->info($sql.PHP_EOL);
                 }
-                $this->repository->getAdapter()->execute($sql);
+                $this->dbRepository->getAdapter()->execute($sql);
             }
-            $this->repository->delete($migration);
+            $this->dbRepository->delete($migration);
         });
     }
 
