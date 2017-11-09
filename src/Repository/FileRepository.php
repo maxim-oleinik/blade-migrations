@@ -41,6 +41,22 @@ class FileRepository
 
 
     /**
+     * Добавить Миграцию в файл
+     *
+     * @param Migration $migration
+     */
+    public function insert(Migration $migration)
+    {
+        $fileName = $this->dir . DIRECTORY_SEPARATOR . $migration->getName();
+        if (is_file($fileName)) {
+            throw new \InvalidArgumentException(__METHOD__.": migration file `{$migration->getName()}` exists");
+        }
+
+        file_put_contents($fileName, $migration->getSql());
+    }
+
+
+    /**
      * Загрузить SQL
      *
      * @param Migration $migration
