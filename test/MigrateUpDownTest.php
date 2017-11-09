@@ -1,7 +1,7 @@
 <?php namespace Usend\Migrations\Test;
 
 use Usend\Migrations\Migration;
-use Usend\Migrations\MigrationsRepository;
+use Usend\Migrations\Repository\DbRepository;
 use Usend\Migrations\MigrationService;
 
 
@@ -11,7 +11,7 @@ use Usend\Migrations\MigrationService;
 class MigrateUpDownTest extends \PHPUnit_Framework_TestCase
 {
     /**
-     * @var MigrationsRepository
+     * @var DbRepository
      */
     private $repository;
 
@@ -21,7 +21,7 @@ class MigrateUpDownTest extends \PHPUnit_Framework_TestCase
     protected function setUp()
     {
         $adapter = new TestDbAdapter;
-        $this->repository = new MigrationsRepository('table_name', $adapter);
+        $this->repository = new DbRepository('table_name', $adapter);
     }
 
 
@@ -54,7 +54,7 @@ class MigrateUpDownTest extends \PHPUnit_Framework_TestCase
         $adapter = new TestDbAdapter;
         $adapter->throwExceptionOnCallNum = 3;
 
-        $this->repository = new MigrationsRepository('table_name', $adapter);
+        $this->repository = new DbRepository('table_name', $adapter);
         $migrator = new MigrationService(__DIR__ . '/fixtures', $this->repository);
 
         $migrator->up(new Migration(null, 'migration2.sql'));

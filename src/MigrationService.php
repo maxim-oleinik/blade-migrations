@@ -1,6 +1,7 @@
 <?php namespace Usend\Migrations;
 
 use Psr\Log\LoggerInterface;
+use Usend\Migrations\Repository\DbRepository;
 
 
 /**
@@ -20,7 +21,7 @@ class MigrationService implements \Psr\Log\LoggerAwareInterface
     private $logger;
 
     /**
-     * @var MigrationsRepository
+     * @var DbRepository
      */
     private $repository;
 
@@ -28,10 +29,10 @@ class MigrationService implements \Psr\Log\LoggerAwareInterface
     /**
      * Конструктор
      *
-     * @param string               $migrationsDir
-     * @param MigrationsRepository $repository
+     * @param string       $migrationsDir
+     * @param DbRepository $repository
      */
-    public function __construct($migrationsDir, MigrationsRepository $repository)
+    public function __construct($migrationsDir, DbRepository $repository)
     {
         $this->migrationsDir = $migrationsDir;
         $this->repository = $repository;
@@ -39,7 +40,7 @@ class MigrationService implements \Psr\Log\LoggerAwareInterface
 
 
     /**
-     * @return MigrationsRepository
+     * @return DbRepository
      */
     public function getRepository()
     {

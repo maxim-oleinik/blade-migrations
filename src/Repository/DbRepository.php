@@ -1,7 +1,10 @@
-<?php namespace Usend\Migrations;
+<?php namespace Usend\Migrations\Repository;
+
+use Usend\Migrations\DbAdapterInterface;
+use Usend\Migrations\Migration;
 
 
-class MigrationsRepository
+class DbRepository
 {
     /**
      * @var string - DB table name

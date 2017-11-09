@@ -1,7 +1,7 @@
 <?php namespace Usend\Migrations\Test;
 
 use Usend\Migrations\Migration;
-use Usend\Migrations\MigrationsRepository;
+use Usend\Migrations\Repository\DbRepository;
 use Usend\Migrations\MigrationService;
 
 /**
@@ -16,7 +16,7 @@ class MigrateStatusTest extends \PHPUnit_Framework_TestCase
      */
     protected function setUp()
     {
-        $this->repository = $this->createMock(MigrationsRepository::class);
+        $this->repository = $this->createMock(DbRepository::class);
     }
 
 
