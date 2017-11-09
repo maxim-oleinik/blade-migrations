@@ -128,7 +128,7 @@ class MigrationService implements \Psr\Log\LoggerAwareInterface
         $this->getRepository()->getAdapter()->transaction(function () use ($migration) {
             foreach ($migration->getUp() as $sql) {
                 if ($this->logger) {
-                    $this->logger->info($sql);
+                    $this->logger->info($sql.PHP_EOL);
                 }
                 $this->getRepository()->getAdapter()->execute($sql);
             }
@@ -146,7 +146,9 @@ class MigrationService implements \Psr\Log\LoggerAwareInterface
 
         $this->getRepository()->getAdapter()->transaction(function () use ($migration) {
             foreach ($migration->getDown() as $sql) {
-                $this->logger->info($sql);
+                if ($this->logger) {
+                    $this->logger->info($sql.PHP_EOL);
+                }
                 $this->repository->getAdapter()->execute($sql);
             }
             $this->repository->delete($migration);
