@@ -2,6 +2,7 @@
 
 use Psr\Log\LoggerInterface;
 use Usend\Migrations\Repository\DbRepository;
+use Usend\Migrations\Repository\FileRepository;
 
 
 /**
@@ -11,14 +12,14 @@ use Usend\Migrations\Repository\DbRepository;
 class MigrationService implements \Psr\Log\LoggerAwareInterface
 {
     /**
-     * @var string
-     */
-    private $migrationsDir;
-
-    /**
      * @var LoggerInterface
      */
     private $logger;
+
+    /**
+     * @var FileRepository
+     */
+    private $fileRepository;
 
     /**
      * @var DbRepository
@@ -29,13 +30,13 @@ class MigrationService implements \Psr\Log\LoggerAwareInterface
     /**
      * Конструктор
      *
-     * @param string       $migrationsDir
-     * @param DbRepository $repository
+     * @param FileRepository $fileRepository
+     * @param DbRepository   $dbRepository
      */
-    public function __construct($migrationsDir, DbRepository $repository)
+    public function __construct(FileRepository $fileRepository, DbRepository $dbRepository)
     {
-        $this->migrationsDir = $migrationsDir;
-        $this->dbRepository = $repository;
+        $this->fileRepository = $fileRepository;
+        $this->dbRepository = $dbRepository;
     }
 
 
@@ -63,23 +64,18 @@ class MigrationService implements \Psr\Log\LoggerAwareInterface
     public function status()
     {
         // Найти все файлы миграций
-        $finder = new \Symfony\Component\Finder\Finder;
-        $finder->files()->in($this->migrationsDir);
-        $found = [];
-        foreach ($finder as $file) {
-            $found[$file->getBasename()] = $file->getPath();
-        }
+        $files = $this->fileRepository->items();
 
         $migrations = $this->dbRepository->items();
         $nameIndex = [];
         foreach ($migrations as $migration) {
             $nameIndex[$migration->getName()] = $migration;
-            if (!isset($found[$migration->getName()])) {
+            if (!isset($files[$migration->getName()])) {
                 $migration->isRemove(true);
             }
         }
 
-        foreach ($found as $name => $path) {
+        foreach ($files as $name => $path) {
             if (!isset($nameIndex[$name])) {
                 $migrations[] = new Migration(null, $name, null);
             }
@@ -120,11 +116,7 @@ class MigrationService implements \Psr\Log\LoggerAwareInterface
         }
 
         // Загрузить SQL
-        $fileName = $this->migrationsDir . DIRECTORY_SEPARATOR . $migration->getName();
-        if (!is_file($fileName)) {
-            throw new \InvalidArgumentException(__METHOD__.": migration file `{$migration->getName()}` not found in dir `{$this->migrationsDir}`");
-        }
-        $migration->setSql(file_get_contents($fileName));
+        $this->fileRepository->loadSql($migration);
 
         $this->getDbRepository()->getAdapter()->transaction(function () use ($migration) {
             foreach ($migration->getUp() as $sql) {

@@ -3,6 +3,7 @@
 use Usend\Migrations\Migration;
 use Usend\Migrations\Repository\DbRepository;
 use Usend\Migrations\MigrationService;
+use Usend\Migrations\Repository\FileRepository;
 
 
 /**
@@ -30,7 +31,7 @@ class MigrateUpDownTest extends \PHPUnit_Framework_TestCase
      */
     public function testUpCommand()
     {
-        $migrator = new MigrationService(__DIR__ . '/fixtures', $this->repository);
+        $migrator = new MigrationService(new FileRepository(__DIR__ . '/fixtures'), $this->repository);
         $migrator->setLogger($logger = new TestLogger);
 
         $migrator->up(new Migration(null, 'migration2.sql'));
@@ -55,7 +56,7 @@ class MigrateUpDownTest extends \PHPUnit_Framework_TestCase
         $adapter->throwExceptionOnCallNum = 3;
 
         $this->repository = new DbRepository('table_name', $adapter);
-        $migrator = new MigrationService(__DIR__ . '/fixtures', $this->repository);
+        $migrator = new MigrationService(new FileRepository(__DIR__ . '/fixtures'), $this->repository);
 
         $migrator->up(new Migration(null, 'migration2.sql'));
 
@@ -73,7 +74,7 @@ class MigrateUpDownTest extends \PHPUnit_Framework_TestCase
      */
     public function testDownCommand()
     {
-        $migrator = new MigrationService(__DIR__ . '/fixtures', $this->repository);
+        $migrator = new MigrationService(new FileRepository(__DIR__ . '/fixtures'), $this->repository);
         $migrator->setLogger($logger = new TestLogger);
 
         $m = new Migration(2, 'migration2.sql');

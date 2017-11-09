@@ -3,6 +3,7 @@
 use Usend\Migrations\Migration;
 use Usend\Migrations\Repository\DbRepository;
 use Usend\Migrations\MigrationService;
+use Usend\Migrations\Repository\FileRepository;
 
 /**
  * @see \Usend\Migrations\MigrationService
@@ -25,7 +26,7 @@ class MigrateStatusTest extends \PHPUnit_Framework_TestCase
      */
     public function testStatusNoMigrations()
     {
-        $migrator = new MigrationService(__DIR__ . '/fixtures/empty_dir', $this->repository);
+        $migrator = new MigrationService(new FileRepository(__DIR__ . '/fixtures/empty_dir'), $this->repository);
         $this->repository->expects($this->any())
             ->method('items')
             ->will($this->returnValue([]));
@@ -41,7 +42,7 @@ class MigrateStatusTest extends \PHPUnit_Framework_TestCase
      */
     public function testStatusUp()
     {
-        $migrator = new MigrationService(__DIR__ . '/fixtures', $this->repository);
+        $migrator = new MigrationService(new FileRepository(__DIR__ . '/fixtures'), $this->repository);
 
         $this->repository->expects($this->any())
             ->method('items')
@@ -73,7 +74,7 @@ class MigrateStatusTest extends \PHPUnit_Framework_TestCase
         $m33 = clone $m3;
         $m33->isRemove(true);
 
-        $migrator = new MigrationService(__DIR__ . '/fixtures', $this->repository);
+        $migrator = new MigrationService(new FileRepository(__DIR__ . '/fixtures'), $this->repository);
         $result = $migrator->status();
         // Накатить М2 и откатить М3
         $this->assertEquals([
