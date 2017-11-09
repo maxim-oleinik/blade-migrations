@@ -131,11 +131,18 @@ class MigrationService implements \Psr\Log\LoggerAwareInterface
 
 
     /**
+     * DOWN
+     *
      * @param \Usend\Migrations\Migration $migration
+     * @param bool                        $loadFromFile
      */
-    public function down(Migration $migration)
+    public function down(Migration $migration, $loadFromFile = false)
     {
-        $this->dbRepository->loadSql($migration);
+        if ($loadFromFile) {
+            $this->fileRepository->loadSql($migration);
+        } else {
+            $this->dbRepository->loadSql($migration);
+        }
 
         $this->getDbRepository()->getAdapter()->transaction(function () use ($migration) {
             foreach ($migration->getDown() as $sql) {
