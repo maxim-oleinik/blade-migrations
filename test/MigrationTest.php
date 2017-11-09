@@ -11,7 +11,7 @@ class MigrationTest extends \PHPUnit_Framework_TestCase
     {
         $m = new Migration(1, 'SomeName', '2017-01-01');
         $m->setSql("
-            --UP
+            --BEGIN
             SELECT 1;
             SELECT 2;
             ;

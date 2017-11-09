@@ -6,7 +6,7 @@
  */
 class Migration
 {
-    const TAG_UP = '--UP';
+    const TAG_BEGIN = '--BEGIN';
     const TAG_DOWN = '--DOWN';
 
     private $up = [];
@@ -42,10 +42,10 @@ class Migration
         $sql = trim($sql);
         $this->sql = $sql;
 
-        if (strpos($sql, self::TAG_UP) !== 0) {
+        if (strpos($sql, self::TAG_BEGIN) !== 0) {
             throw new \InvalidArgumentException(__METHOD__. ": UP tag not found");
         }
-        $sql = trim(substr($sql, strlen(self::TAG_UP)));
+        $sql = trim(substr($sql, strlen(self::TAG_BEGIN)));
 
         if (strpos($sql, self::TAG_DOWN) === false) {
             throw new \InvalidArgumentException(__METHOD__. ": DOWN tag not found");
