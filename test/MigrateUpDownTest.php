@@ -35,7 +35,7 @@ class MigrateUpDownTest extends \PHPUnit_Framework_TestCase
         $migrator->setLogger($logger = new TestLogger);
 
         $migrator->up(new Migration(null, 'migration2.sql'));
-        $this->assertEquals(['M2: UP-1', 'M2: UP-2'], $logger->getLog());
+        $this->assertEquals(["M2: UP-1\n", "M2: UP-2\n"], $logger->getLog());
 
         $this->assertEquals([
             'BEGIN',
@@ -83,7 +83,7 @@ class MigrateUpDownTest extends \PHPUnit_Framework_TestCase
             ['M2: DOWN'],
         ];
         $migrator->down($m);
-        $this->assertEquals(['M2: DOWN'], $logger->getLog());
+        $this->assertEquals(["M2: DOWN\n"], $logger->getLog());
 
         $this->assertEquals([
             'BEGIN',
