@@ -59,6 +59,25 @@ class DbRepository
 
 
     /**
+     * FindByID
+     *
+     * @param  int $id
+     * @return \Usend\Migrations\Migration|null
+     */
+    public function findById($id)
+    {
+        $id = (int) $id;
+        if ($id) {
+            $sql = sprintf("SELECT id, name, created_at FROM {$this->tableName} WHERE id=%d LIMIT 1", $id);
+            if ($data = $this->adapter->selectList($sql)) {
+                return $this->_make_model(current($data));
+            }
+        }
+        return null;
+    }
+
+
+    /**
      * Получить список всех Миграций
      *
      * @return Migration[]
@@ -73,13 +92,23 @@ class DbRepository
 
         $result = [];
         foreach ($data as $row) {
-            $row = array_values((array)$row);
-            $result[] = new Migration($row[0], $row[1], $row[2]);
+            $result[] = $this->_make_model($row);
         }
         // Сортировать по возрастанию
         rsort($result);
 
         return $result;
+    }
+
+
+    /**
+     * @param $row
+     * @return \Usend\Migrations\Migration
+     */
+    private function _make_model($row)
+    {
+        $row = array_values((array)$row);
+        return new Migration($row[0], $row[1], $row[2]);
     }
 
 
