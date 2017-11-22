@@ -30,7 +30,7 @@ class FileRepository
     public function items()
     {
         $finder = new \Symfony\Component\Finder\Finder;
-        $finder->files()->in($this->dir);
+        $finder->files()->in($this->dir)->sortByName();
         $found = [];
         foreach ($finder as $file) {
             $found[$file->getBasename()] = $file->getPath();
