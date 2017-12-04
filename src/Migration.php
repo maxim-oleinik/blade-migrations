@@ -127,7 +127,8 @@ class Migration
 
     private function _parse_sql($sql)
     {
-        return array_filter(array_map('trim', explode(';', trim($sql))));
+        return array_filter(array_map('trim',
+            preg_split("/;[\s]*\n/", rtrim(trim($sql), ';'))));
     }
 
 
