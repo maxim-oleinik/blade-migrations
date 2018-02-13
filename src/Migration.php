@@ -7,7 +7,7 @@
 class Migration
 {
     const TAG_BEGIN = '--BEGIN';
-    const TAG_DOWN = '--DOWN';
+    const TAG_ROLLBACK = '--ROLLBACK';
 
     private $up = [];
     private $down = [];
@@ -48,7 +48,7 @@ class Migration
         }
         $sql = trim(substr($sql, $matches[0][1] + strlen(self::TAG_BEGIN)));
 
-        preg_match('/--DOWN(?:[\s]|$)/', $sql, $matches, PREG_OFFSET_CAPTURE);
+        preg_match('/--ROLLBACK(?:[\s]|$)/', $sql, $matches, PREG_OFFSET_CAPTURE);
         if (!$matches) {
             throw new \InvalidArgumentException(__METHOD__. ": DOWN tag not found");
         }

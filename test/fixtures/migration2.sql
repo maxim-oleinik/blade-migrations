@@ -2,6 +2,6 @@
 M2: UP-1;
 M2: UP-2;
 
---DOWN
+--ROLLBACK
 M2: DOWN-1;
 M2: DOWN-2;

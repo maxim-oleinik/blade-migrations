@@ -40,7 +40,7 @@ class MigrationTest extends \PHPUnit_Framework_TestCase
         $m = new Migration(1, 'SomeName', '2017-01-01');
         $m->setSql("
             --BEGIN
-            --DOWN
+            --ROLLBACK
         ");
 
         $this->assertSame([], $m->getUp(),'Список запросов для UP');
@@ -60,7 +60,7 @@ class MigrationTest extends \PHPUnit_Framework_TestCase
             --BEGIN
             SELECT 1;
 
-            --DOWN
+            --ROLLBACK
             SELECT 2
         ");
 
@@ -88,13 +88,13 @@ class MigrationTest extends \PHPUnit_Framework_TestCase
             SELECT 2;
             ;
             ;
-            --DOWN222
-            --DOWN
+            --ROLLBACK222
+            --ROLLBACK
             SELECT 11; 
             SELECT 22;
         ");
 
-        $this->assertEquals(["SELECT ';', 1", 'SELECT 2', '--DOWN222'], $m->getUp(),
+        $this->assertEquals(["SELECT ';', 1", 'SELECT 2', '--ROLLBACK222'], $m->getUp(),
             'Список запросов для UP');
 
         $this->assertEquals(['SELECT 11', 'SELECT 22'], $m->getDown(),
