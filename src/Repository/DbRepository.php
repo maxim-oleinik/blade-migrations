@@ -49,6 +49,7 @@ class DbRepository
             (
               id serial NOT NULL,
               created_at timestamp (0) without time zone NOT NULL DEFAULT now(),
+              in_transaction INT NOT NULL,
               name character varying (255) NOT NULL,
               down TEXT NOT NULL
             );
@@ -87,7 +88,7 @@ class DbRepository
         if ($limit) {
             $limit = ' LIMIT ' . $limit;
         }
-        $sql ="SELECT id, name, created_at FROM {$this->tableName} ORDER BY id DESC" . $limit;
+        $sql ="SELECT id, name, in_transaction, created_at FROM {$this->tableName} ORDER BY id DESC" . $limit;
         $data = $this->adapter->selectList($sql);
 
         $result = [];
@@ -108,7 +109,9 @@ class DbRepository
     private function _make_model($row)
     {
         $row = array_values((array)$row);
-        return new Migration($row[0], $row[1], $row[2]);
+        $m = new Migration($row[0], $row[1], $row[3]);
+        $m->isTransaction($row[2]);
+        return $m;
     }
 
 
@@ -119,8 +122,9 @@ class DbRepository
      */
     public function insert(Migration $migration)
     {
-        $sql = sprintf("INSERT INTO {$this->tableName} (name, down) VALUES ('%s', '%s')",
+        $sql = sprintf("INSERT INTO {$this->tableName} (name, in_transaction, down) VALUES ('%s', %d, '%s')",
             $this->adapter->escape($migration->getName()),
+            $migration->isTransaction()?1:0,
             $this->adapter->escape(implode(";\n", $migration->getDown()))
         );
 

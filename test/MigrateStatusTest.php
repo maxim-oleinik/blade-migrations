@@ -50,11 +50,12 @@ class MigrateStatusTest extends \PHPUnit_Framework_TestCase
 
         $result = $migrator->status();
         $this->assertEquals([
+            $m3 = new Migration(null, 'migration-no-trans.sql', null),
             $m1 = new Migration(null, 'migration1.sql', null),
             $m2 = new Migration(null, 'migration2.sql', null),
         ], $result);
 
-        $this->assertEquals([$m1, $m2], $migrator->getDiff());
+        $this->assertEquals([$m3, $m1, $m2], $migrator->getDiff());
     }
 
 
@@ -80,10 +81,11 @@ class MigrateStatusTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals([
             $m11, // уже применена
             $m33, // удалить
+            $m4 = new Migration(null, 'migration-no-trans.sql', null), // новая
             $m2 = new Migration(null, 'migration2.sql', null), // новая
         ], $result);
 
-        $this->assertEquals([$m3, $m2], $migrator->getDiff());
+        $this->assertEquals([$m3, $m4, $m2], $migrator->getDiff());
     }
 
 }

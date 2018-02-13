@@ -118,15 +118,16 @@ class MigrationService implements \Psr\Log\LoggerAwareInterface
         // Загрузить SQL
         $this->fileRepository->loadSql($migration);
 
-        $this->getDbRepository()->getAdapter()->transaction(function () use ($migration) {
-            foreach ($migration->getUp() as $sql) {
-                if ($this->logger) {
-                    $this->logger->info($sql.PHP_EOL);
-                }
-                $this->getDbRepository()->getAdapter()->execute($sql);
-            }
+        $func = function () use ($migration) {
+            $this->_processMigrationSql($migration->getUp());
             $this->getDbRepository()->insert($migration);
-        });
+        };
+
+        if ($migration->isTransaction()) {
+            $this->getDbRepository()->getAdapter()->transaction($func);
+        } else {
+            $func();
+        }
     }
 
 
@@ -144,15 +145,31 @@ class MigrationService implements \Psr\Log\LoggerAwareInterface
             $this->dbRepository->loadSql($migration);
         }
 
-        $this->getDbRepository()->getAdapter()->transaction(function () use ($migration) {
-            foreach ($migration->getDown() as $sql) {
-                if ($this->logger) {
-                    $this->logger->info($sql.PHP_EOL);
-                }
-                $this->dbRepository->getAdapter()->execute($sql);
-            }
+        $func = function () use ($migration) {
+            $this->_processMigrationSql($migration->getDown());
             $this->dbRepository->delete($migration);
-        });
+        };
+
+        if ($migration->isTransaction()) {
+            $this->getDbRepository()->getAdapter()->transaction($func);
+        } else {
+            $func();
+        }
     }
 
+
+    /**
+     * Выполнить полученный SQL
+     *
+     * @param array $sqlList
+     */
+    private function _processMigrationSql(array $sqlList)
+    {
+        foreach ($sqlList as $sql) {
+            if ($this->logger) {
+                $this->logger->info($sql.PHP_EOL);
+            }
+            $this->getDbRepository()->getAdapter()->execute($sql);
+        }
+    }
 }

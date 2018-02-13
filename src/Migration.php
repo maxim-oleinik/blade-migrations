@@ -1,19 +1,19 @@
 <?php namespace Usend\Migrations;
 
-
 /**
  * @see \Usend\Migrations\Test\MigrationTest
  */
 class Migration
 {
-    const TAG_BEGIN = '--BEGIN';
-    const TAG_ROLLBACK = '--ROLLBACK';
-    const TAG_UP = '--UP';
-    const TAG_DOWN = '--DOWN';
+    const TAG_BEGIN     = '--BEGIN';
+    const TAG_ROLLBACK  = '--ROLLBACK';
+    const TAG_UP        = '--UP';
+    const TAG_DOWN      = '--DOWN';
 
     private $up = [];
     private $down = [];
     private $isRemove = false;
+    private $isTransaction = true;
 
     private $id;
     private $name;
@@ -49,8 +49,7 @@ class Migration
         $up = null;
         $down = null;
 
-        $isTransaction = false;
-        $tagDown = self::TAG_DOWN;
+        $tagDown = self::TAG_ROLLBACK;
         $posUp = null;
         $posDown = null;
 
@@ -59,10 +58,10 @@ class Migration
             $tag = trim($tag);
 
             switch (trim($tag)) {
-                case self::TAG_BEGIN:
-                    $isTransaction = true;
-                    $tagDown = self::TAG_ROLLBACK;
                 case self::TAG_UP:
+                    $this->isTransaction = false;
+                    $tagDown = self::TAG_DOWN;
+                case self::TAG_BEGIN:
                     if (null !== $posUp) {
                         throw new \InvalidArgumentException(__METHOD__. ": Expected single {$tag} tag");
                     }
@@ -150,7 +149,24 @@ class Migration
     }
 
     /**
-     * @param string $up
+     * Выполняется в транзакции
+     *
+     * @param bool $newValue
+     * @return bool
+     */
+    public function isTransaction($newValue = null)
+    {
+        if (null !== $newValue) {
+            $this->isTransaction = (bool) $newValue;
+        }
+        return $this->isTransaction;
+    }
+
+
+    /**
+     * UP
+     *
+     * @param string $up - SQL разделенный ";"
      */
     public function setUp($up)
     {
@@ -158,34 +174,42 @@ class Migration
     }
 
     /**
-     * @param string $down
-     */
-    public function setDown($down)
-    {
-        $this->down = $this->_parse_sql($down);
-    }
-
-    private function _parse_sql($sql)
-    {
-        return array_values(array_filter(array_map('trim',
-            preg_split("/;[\s]*\n/", rtrim(trim($sql), ';')))));
-    }
-
-
-    /**
-     * @return array
+     * @return array - Массив SQL-запросов
      */
     public function getUp()
     {
         return $this->up;
     }
 
+
     /**
-     * @return array
+     * DOWN
+     *
+     * @param string $down - SQL разделенный ";"
+     */
+    public function setDown($down)
+    {
+        $this->down = $this->_parse_sql($down);
+    }
+
+    /**
+     * @return array - Массив SQL-запросов
      */
     public function getDown()
     {
         return $this->down;
     }
 
+
+    /**
+     * Разобрать SQL на массив запросов
+     *
+     * @param  string $sql - SQL разделенный ";"
+     * @return array - Массив SQL-запросов
+     */
+    private function _parse_sql($sql)
+    {
+        return array_values(array_filter(array_map('trim',
+            preg_split("/;[\s]*\n/", rtrim(trim($sql), ';')))));
+    }
 }

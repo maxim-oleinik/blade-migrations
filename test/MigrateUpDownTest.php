@@ -41,8 +41,26 @@ class MigrateUpDownTest extends \PHPUnit_Framework_TestCase
             'BEGIN',
             'M2: UP-1',
             'M2: UP-2',
-            "INSERT INTO table_name (name, down) VALUES ('migration2.sql', 'M2: DOWN-1;\nM2: DOWN-2')",
+            "INSERT INTO table_name (name, in_transaction, down) VALUES ('migration2.sql', 1, 'M2: DOWN-1;\nM2: DOWN-2')",
             'COMMIT',
+        ], $this->repository->getAdapter()->log);
+    }
+
+
+    /**
+     * UP без транзакции
+     */
+    public function testUpNoTransaction()
+    {
+        $migrator = new MigrationService(new FileRepository(__DIR__ . '/fixtures'), $this->repository);
+        $migrator->setLogger($logger = new TestLogger);
+
+        $migrator->up(new Migration(null, 'migration-no-trans.sql'));
+        $this->assertEquals(["M3: UP\n"], $logger->getLog());
+
+        $this->assertEquals([
+            'M3: UP',
+            "INSERT INTO table_name (name, in_transaction, down) VALUES ('migration-no-trans.sql', 0, 'M3: DOWN')",
         ], $this->repository->getAdapter()->log);
     }
 
@@ -93,4 +111,27 @@ class MigrateUpDownTest extends \PHPUnit_Framework_TestCase
         ], $this->repository->getAdapter()->log);
     }
 
+
+    /**
+     * Down без транзакции
+     */
+    public function testDownNoTransaction()
+    {
+        $migrator = new MigrationService(new FileRepository(__DIR__ . '/fixtures'), $this->repository);
+        $migrator->setLogger($logger = new TestLogger);
+
+        $m = new Migration(2, 'migration-no-trans.sql');
+        $m->isTransaction(false);
+
+        $this->repository->getAdapter()->returnValue = [
+            ['M3: DOWN'],
+        ];
+        $migrator->down($m);
+        $this->assertEquals(["M3: DOWN\n"], $logger->getLog());
+
+        $this->assertEquals([
+            'M3: DOWN',
+            "DELETE FROM table_name WHERE id='2'",
+        ], $this->repository->getAdapter()->log);
+    }
 }

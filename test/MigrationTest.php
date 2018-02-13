@@ -121,17 +121,43 @@ class MigrationTest extends \PHPUnit_Framework_TestCase
             SELECT 2;
             ;
             ;
-            --ROLLBACK222
+            --ROLLBACKCOMMENT
             --ROLLBACK
             SELECT 11; 
             SELECT 22;
         ");
 
-        $this->assertEquals(["SELECT ';', 1", 'SELECT 2', '--ROLLBACK222'], $m->getUp(),
+        $this->assertEquals(["SELECT ';', 1", 'SELECT 2', '--ROLLBACKCOMMENT'], $m->getUp(),
             'Список запросов для UP');
 
         $this->assertEquals(['SELECT 11', 'SELECT 22'], $m->getDown(),
             'Список запросов для Down');
+
+        $this->assertTrue($m->isTransaction(), 'Миграция в Транзакции');
     }
 
+
+    /**
+     * Миграция вне транзакции
+     */
+    public function testNoTransactionMigration()
+    {
+        $m = new Migration(1, 'SomeName', '2017-01-01');
+        $m->setSql("
+            --UP
+            SELECT 1;
+            SELECT 2;
+
+            --DOWN
+            SELECT 3
+        ");
+
+        $this->assertEquals(["SELECT 1", 'SELECT 2'], $m->getUp(),
+            'Список запросов для UP');
+
+        $this->assertEquals(['SELECT 3'], $m->getDown(),
+            'Список запросов для Down');
+
+        $this->assertFalse($m->isTransaction(), 'Миграция НЕ в Транзакции');
+    }
 }
