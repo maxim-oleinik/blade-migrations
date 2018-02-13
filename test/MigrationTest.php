@@ -8,29 +8,62 @@ use \Usend\Migrations\Migration;
 class MigrationTest extends \PHPUnit_Framework_TestCase
 {
     /**
-     * Begin тег не найден
+     * Ошибки разбора тегов
      */
-    public function testBeginTagNotFound()
+    public function tagErrors()
     {
-        $m = new Migration(1, 'SomeName', '2017-01-01');
+        return [
+            ['UP tag not found', ''],
+            ['UP tag not found', 'SELECT 1'],
 
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('UP tag not found');
-        $m->setSql('');
+            ['DOWN tag not found', '--BEGIN'],
+            ['DOWN tag not found', '--UP'],
+
+            ['Expected BEGIN/UP tag first', '--DOWN'],
+            ['Expected BEGIN/UP tag first', '--ROLLBACK'],
+
+            ['Expected BEGIN/UP tag first', "
+                --ROLLBACK
+                --BEGIN
+            "],
+
+            ['Expected `--DOWN`, got `--ROLLBACK`', "
+                --UP
+                --ROLLBACK
+            "],
+
+            ['Expected `--ROLLBACK`, got `--DOWN`', "
+                --BEGIN
+                --DOWN
+            "],
+
+            ['Expected single --DOWN tag', "
+                --UP
+                --DOWN
+                --DOWN
+            "],
+
+            ['Expected single --UP tag', "
+                --UP
+                --UP
+                --DOWN
+            "],
+        ];
     }
-
 
     /**
-     * Rollback тег не найден
+     * @dataProvider tagErrors
      */
-    public function testRollbackTagNotFound()
+    public function testTagErrors($exceptionMessage, $sql)
     {
         $m = new Migration(1, 'SomeName', '2017-01-01');
 
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('DOWN tag not found');
-        $m->setSql("--BEGIN");
+        $this->expectExceptionMessage($exceptionMessage);
+
+        $m->setSql($sql);
     }
+
 
     /**
      * Нет инструкций

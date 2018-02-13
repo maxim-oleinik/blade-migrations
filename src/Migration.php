@@ -8,6 +8,8 @@ class Migration
 {
     const TAG_BEGIN = '--BEGIN';
     const TAG_ROLLBACK = '--ROLLBACK';
+    const TAG_UP = '--UP';
+    const TAG_DOWN = '--DOWN';
 
     private $up = [];
     private $down = [];
@@ -42,18 +44,53 @@ class Migration
         $sql = trim($sql);
         $this->sql = $sql;
 
-        preg_match('/--BEGIN(?:[\s]|$)/', $sql, $matches, PREG_OFFSET_CAPTURE);
-        if (!$matches) {
-            throw new \InvalidArgumentException(__METHOD__. ": UP tag not found");
-        }
-        $sql = trim(substr($sql, $matches[0][1] + strlen(self::TAG_BEGIN)));
+        preg_match_all('/--[A-Z]+(?:[\s]|$)/', $sql, $matches, PREG_OFFSET_CAPTURE);
 
-        preg_match('/--ROLLBACK(?:[\s]|$)/', $sql, $matches, PREG_OFFSET_CAPTURE);
-        if (!$matches) {
-            throw new \InvalidArgumentException(__METHOD__. ": DOWN tag not found");
+        $up = null;
+        $down = null;
+
+        $isTransaction = false;
+        $tagDown = self::TAG_DOWN;
+        $posUp = null;
+        $posDown = null;
+
+        foreach ($matches[0] as $data) {
+            list($tag, $position) = $data;
+            $tag = trim($tag);
+
+            switch (trim($tag)) {
+                case self::TAG_BEGIN:
+                    $isTransaction = true;
+                    $tagDown = self::TAG_ROLLBACK;
+                case self::TAG_UP:
+                    if (null !== $posUp) {
+                        throw new \InvalidArgumentException(__METHOD__. ": Expected single {$tag} tag");
+                    }
+                    $posUp = $position + strlen($tag);
+                    break;
+
+                case self::TAG_ROLLBACK:
+                case self::TAG_DOWN:
+                    if (null === $posUp) {
+                        throw new \InvalidArgumentException(__METHOD__. ": Expected BEGIN/UP tag first");
+                    } elseif ($tag != $tagDown) {
+                        throw new \InvalidArgumentException(__METHOD__. ": Expected `{$tagDown}`, got `{$tag}` tag");
+                    } elseif (null !== $posDown) {
+                        throw new \InvalidArgumentException(__METHOD__. ": Expected single {$tag} tag");
+                    }
+                    $posDown = $position + strlen($tag);
+                    $up   = trim(substr($sql, $posUp, $position - $posUp));
+                    $down = trim(substr($sql, $posDown));
+                    break;
+            }
         }
-        $up = trim(substr($sql, 0, $matches[0][1]));
-        $down = trim(substr($sql, $matches[0][1] + strlen($matches[0][0])));
+
+        if (null === $posUp) {
+            throw new \InvalidArgumentException(__METHOD__. ": BEGIN/UP tag not found");
+        }
+        if (null === $posDown) {
+            throw new \InvalidArgumentException(__METHOD__. ": ROLLBACK/DOWN tag not found");
+        }
 
         $this->setUp($up);
         $this->setDown($down);
@@ -113,7 +150,7 @@ class Migration
     }
 
     /**
-     * @param array $up
+     * @param string $up
      */
     public function setUp($up)
     {
@@ -121,7 +158,7 @@ class Migration
     }
 
     /**
-     * @param array $down
+     * @param string $down
      */
     public function setDown($down)
     {
