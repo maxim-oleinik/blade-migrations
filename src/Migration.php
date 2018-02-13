@@ -42,16 +42,19 @@ class Migration
         $sql = trim($sql);
         $this->sql = $sql;
 
-        if (strpos($sql, self::TAG_BEGIN) !== 0) {
+        preg_match('/--BEGIN(?:[\s]|$)/', $sql, $matches, PREG_OFFSET_CAPTURE);
+        if (!$matches) {
             throw new \InvalidArgumentException(__METHOD__. ": UP tag not found");
         }
-        $sql = trim(substr($sql, strlen(self::TAG_BEGIN)));
+        $sql = trim(substr($sql, $matches[0][1] + strlen(self::TAG_BEGIN)));
 
-        if (strpos($sql, self::TAG_DOWN) === false) {
+        preg_match('/--DOWN(?:[\s]|$)/', $sql, $matches, PREG_OFFSET_CAPTURE);
+        if (!$matches) {
             throw new \InvalidArgumentException(__METHOD__. ": DOWN tag not found");
         }
+        $up = trim(substr($sql, 0, $matches[0][1]));
+        $down = trim(substr($sql, $matches[0][1] + strlen($matches[0][0])));
 
-        list($up, $down) = explode(self::TAG_DOWN, $sql);
         $this->setUp($up);
         $this->setDown($down);
     }
@@ -127,8 +130,8 @@ class Migration
 
     private function _parse_sql($sql)
     {
-        return array_filter(array_map('trim',
-            preg_split("/;[\s]*\n/", rtrim(trim($sql), ';'))));
+        return array_values(array_filter(array_map('trim',
+            preg_split("/;[\s]*\n/", rtrim(trim($sql), ';')))));
     }
 
 

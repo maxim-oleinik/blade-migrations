@@ -8,6 +8,31 @@ use \Usend\Migrations\Migration;
 class MigrationTest extends \PHPUnit_Framework_TestCase
 {
     /**
+     * Begin тег не найден
+     */
+    public function testBeginTagNotFound()
+    {
+        $m = new Migration(1, 'SomeName', '2017-01-01');
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('UP tag not found');
+        $m->setSql('');
+    }
+
+
+    /**
+     * Rollback тег не найден
+     */
+    public function testRollbackTagNotFound()
+    {
+        $m = new Migration(1, 'SomeName', '2017-01-01');
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('DOWN tag not found');
+        $m->setSql("--BEGIN");
+    }
+
+    /**
      * Нет инструкций
      */
     public function testEmpty()
@@ -46,25 +71,30 @@ class MigrationTest extends \PHPUnit_Framework_TestCase
 
     /**
      * Несколько комманд
-     * - ; в тексте комманды
-     * - пробельные символы после ;
+     *   - произвольный текст до BEGIN
+     *   - пробелы после управляющих тегов
+     *   - ; в тексте комманды
+     *   - пробельные символы после ;
      */
     public function testMultiLine()
     {
         $m = new Migration(1, 'SomeName', '2017-01-01');
         $m->setSql("
-            --BEGIN
+                some text
+            --BEGINNER - тег должен завершаться переносом строки
+            --BEGIN  
             SELECT ';', 1;
 
             SELECT 2;
             ;
             ;
+            --DOWN222
             --DOWN
             SELECT 11; 
             SELECT 22;
         ");
 
-        $this->assertEquals(["SELECT ';', 1", 'SELECT 2'], $m->getUp(),
+        $this->assertEquals(["SELECT ';', 1", 'SELECT 2', '--DOWN222'], $m->getUp(),
             'Список запросов для UP');
 
         $this->assertEquals(['SELECT 11', 'SELECT 22'], $m->getDown(),
