@@ -47,7 +47,7 @@ class DbRepository
         $sql = "
             CREATE TABLE {$this->tableName}
             (
-              id serial NOT NULL,
+              id serial NOT NULL PRIMARY KEY,
               created_at timestamp (0) without time zone NOT NULL DEFAULT now(),
               in_transaction INT NOT NULL,
               name character varying (255) NOT NULL,
