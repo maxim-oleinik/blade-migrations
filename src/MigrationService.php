@@ -126,6 +126,7 @@ class MigrationService implements \Psr\Log\LoggerAwareInterface
         if ($migration->isTransaction()) {
             $this->getDbRepository()->getAdapter()->transaction($func);
         } else {
+            $this->logger->alert('NO TRANSACTION!');
             $func();
         }
     }
@@ -153,6 +154,7 @@ class MigrationService implements \Psr\Log\LoggerAwareInterface
         if ($migration->isTransaction()) {
             $this->getDbRepository()->getAdapter()->transaction($func);
         } else {
+            $this->logger->alert('NO TRANSACTION!');
             $func();
         }
     }

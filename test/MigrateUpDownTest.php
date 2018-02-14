@@ -56,7 +56,7 @@ class MigrateUpDownTest extends \PHPUnit_Framework_TestCase
         $migrator->setLogger($logger = new TestLogger);
 
         $migrator->up(new Migration(null, 'migration-no-trans.sql'));
-        $this->assertEquals(["M3: UP\n"], $logger->getLog());
+        $this->assertEquals(['NO TRANSACTION!',"M3: UP\n"], $logger->getLog());
 
         $this->assertEquals([
             'M3: UP',
@@ -127,7 +127,7 @@ class MigrateUpDownTest extends \PHPUnit_Framework_TestCase
             ['M3: DOWN'],
         ];
         $migrator->down($m);
-        $this->assertEquals(["M3: DOWN\n"], $logger->getLog());
+        $this->assertEquals(['NO TRANSACTION!', "M3: DOWN\n"], $logger->getLog());
 
         $this->assertEquals([
             'M3: DOWN',
