@@ -95,8 +95,6 @@ class DbRepository
         foreach ($data as $row) {
             $result[] = $this->_make_model($row);
         }
-        // Сортировать по возрастанию
-        rsort($result);
 
         return $result;
     }
