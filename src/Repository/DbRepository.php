@@ -69,7 +69,7 @@ class DbRepository
     {
         $id = (int) $id;
         if ($id) {
-            $sql = sprintf("SELECT id, name, created_at FROM {$this->tableName} WHERE id=%d LIMIT 1", $id);
+            $sql = sprintf("SELECT id, name, in_transaction, created_at FROM {$this->tableName} WHERE id=%d LIMIT 1", $id);
             if ($data = $this->adapter->selectList($sql)) {
                 return $this->_make_model(current($data));
             }
