@@ -1,6 +1,6 @@
-<?php namespace Usend\Migrations\Test;
+<?php namespace Blade\Migrations\Test;
 
-use Usend\Migrations\DbAdapterInterface;
+use Blade\Migrations\DbAdapterInterface;
 
 class TestDbException extends \Exception {}
 

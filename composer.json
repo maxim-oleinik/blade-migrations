@@ -1,5 +1,5 @@
 {
-  "name": "usend/migrations",
+  "name": "blade/migrations",
   "description": "Raw SQL database migration tool for PHP app",
   "keywords": ["migrations", "database", "db", "database migrations"],
   "license": "MIT",
@@ -14,12 +14,12 @@
   ],
   "autoload": {
     "psr-4": {
-      "Usend\\Migrations\\": "src"
+      "Blade\\Migrations\\": "src"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "Usend\\Migrations\\Test\\": "test/lib"
+      "Blade\\Migrations\\Test\\": "test/lib"
     }
   }
 }

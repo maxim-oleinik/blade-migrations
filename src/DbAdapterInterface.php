@@ -1,4 +1,4 @@
-<?php namespace Usend\Migrations;
+<?php namespace Blade\Migrations;
 
 
 interface DbAdapterInterface

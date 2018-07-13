@@ -1,6 +1,6 @@
-<?php namespace Usend\Migrations\Repository;
+<?php namespace Blade\Migrations\Repository;
 
-use Usend\Migrations\Migration;
+use Blade\Migrations\Migration;
 
 
 class FileRepository

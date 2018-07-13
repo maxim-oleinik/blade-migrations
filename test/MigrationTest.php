@@ -1,9 +1,9 @@
-<?php namespace Usend\Migrations\Test;
+<?php namespace Blade\Migrations\Test;
 
-use \Usend\Migrations\Migration;
+use \Blade\Migrations\Migration;
 
 /**
- * @see \Usend\Migrations\Migration
+ * @see \Blade\Migrations\Migration
  */
 class MigrationTest extends \PHPUnit_Framework_TestCase
 {

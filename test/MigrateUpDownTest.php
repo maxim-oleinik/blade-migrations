@@ -1,13 +1,13 @@
-<?php namespace Usend\Migrations\Test;
+<?php namespace Blade\Migrations\Test;
 
-use Usend\Migrations\Migration;
-use Usend\Migrations\Repository\DbRepository;
-use Usend\Migrations\MigrationService;
-use Usend\Migrations\Repository\FileRepository;
+use Blade\Migrations\Migration;
+use Blade\Migrations\Repository\DbRepository;
+use Blade\Migrations\MigrationService;
+use Blade\Migrations\Repository\FileRepository;
 
 
 /**
- * @see \Usend\Migrations\MigrationService
+ * @see \Blade\Migrations\MigrationService
  */
 class MigrateUpDownTest extends \PHPUnit_Framework_TestCase
 {

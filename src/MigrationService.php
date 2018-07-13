@@ -1,13 +1,13 @@
-<?php namespace Usend\Migrations;
+<?php namespace Blade\Migrations;
 
 use Psr\Log\LoggerInterface;
-use Usend\Migrations\Repository\DbRepository;
-use Usend\Migrations\Repository\FileRepository;
+use Blade\Migrations\Repository\DbRepository;
+use Blade\Migrations\Repository\FileRepository;
 
 
 /**
- * @see \Usend\Migrations\Test\MigrateStatusTest
- * @see \Usend\Migrations\Test\MigrateUpDownTest
+ * @see \Blade\Migrations\Test\MigrateStatusTest
+ * @see \Blade\Migrations\Test\MigrateUpDownTest
  */
 class MigrationService implements \Psr\Log\LoggerAwareInterface
 {
@@ -135,7 +135,7 @@ class MigrationService implements \Psr\Log\LoggerAwareInterface
     /**
      * DOWN
      *
-     * @param \Usend\Migrations\Migration $migration
+     * @param \Blade\Migrations\Migration $migration
      * @param bool                        $loadFromFile
      */
     public function down(Migration $migration, $loadFromFile = false)

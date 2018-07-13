@@ -1,7 +1,7 @@
-<?php namespace Usend\Migrations\Repository;
+<?php namespace Blade\Migrations\Repository;
 
-use Usend\Migrations\DbAdapterInterface;
-use Usend\Migrations\Migration;
+use Blade\Migrations\DbAdapterInterface;
+use Blade\Migrations\Migration;
 
 
 class DbRepository
@@ -63,7 +63,7 @@ class DbRepository
      * FindByID
      *
      * @param  int $id
-     * @return \Usend\Migrations\Migration|null
+     * @return \Blade\Migrations\Migration|null
      */
     public function findById($id)
     {
@@ -102,7 +102,7 @@ class DbRepository
 
     /**
      * @param $row
-     * @return \Usend\Migrations\Migration
+     * @return \Blade\Migrations\Migration
      */
     private function _make_model($row)
     {
@@ -145,7 +145,7 @@ class DbRepository
 
 
     /**
-     * @param \Usend\Migrations\Migration $migration
+     * @param \Blade\Migrations\Migration $migration
      */
     public function loadSql(Migration $migration)
     {

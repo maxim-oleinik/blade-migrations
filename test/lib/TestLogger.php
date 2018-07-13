@@ -1,4 +1,4 @@
-<?php namespace Usend\Migrations\Test;
+<?php namespace Blade\Migrations\Test;
 
 use Psr\Log\AbstractLogger;
 
