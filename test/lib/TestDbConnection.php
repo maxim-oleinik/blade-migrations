@@ -1,48 +1,41 @@
 <?php namespace Blade\Migrations\Test;
 
-use Blade\Migrations\DbAdapterInterface;
+use Blade\Database\DbConnectionInterface;
 
 class TestDbException extends \Exception {}
 
-class TestDbAdapter implements DbAdapterInterface
+class TestDbConnection implements DbConnectionInterface
 {
     public $returnValue;
     public $throwExceptionOnCallNum = 0;
     public $log = [];
 
-    public function escape($value)
+    public function escape($value): string
     {
-        return $value;
+        return (string)$value;
     }
 
-    public function execute($sql)
+    public function execute($sql, $bindings = []): int
     {
         $this->log[] = $sql;
         if ($this->throwExceptionOnCallNum && $this->throwExceptionOnCallNum == count($this->log)) {
             throw new TestDbException('DB exception');
         }
+        return 1;
     }
 
-    public function selectList($sql)
-    {
-        return $this->returnValue;
-    }
 
-    public function transaction(callable $func)
+    public function select($sql, $bindings = []): \Traversable
     {
-        $this->begin();
-        try {
-            $func();
-            $this->commit();
-        } catch (TestDbException $e) {
-            $this->rollback();
-            // Проглатываем наши исключения
-            // throw $e;
+        if (!$this->returnValue) {
+            $this->returnValue = [];
         }
+        $result = new \ArrayIterator($this->returnValue);
+        return $result;
     }
 
 
-    public function begin()
+    public function beginTransaction()
     {
         $this->execute('BEGIN');
     }
@@ -56,5 +49,4 @@ class TestDbAdapter implements DbAdapterInterface
     {
         $this->execute('ROLLBACK');
     }
-
 }

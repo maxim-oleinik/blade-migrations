@@ -1,5 +1,6 @@
 <?php namespace Blade\Migrations\Test;
 
+use Blade\Database\DbAdapter;
 use Blade\Migrations\Migration;
 use Blade\Migrations\Repository\DbRepository;
 use Blade\Migrations\MigrationService;
@@ -21,7 +22,7 @@ class MigrateUpDownTest extends \PHPUnit_Framework_TestCase
      */
     protected function setUp()
     {
-        $adapter = new TestDbAdapter;
+        $adapter = new DbAdapter(new TestDbConnection());
         $this->repository = new DbRepository('table_name', $adapter);
     }
 
@@ -43,7 +44,7 @@ class MigrateUpDownTest extends \PHPUnit_Framework_TestCase
             'M2: UP-2',
             "INSERT INTO table_name (name, in_transaction, down) VALUES ('migration2.sql', 1, 'M2: DOWN-1;\nM2: DOWN-2')",
             'COMMIT',
-        ], $this->repository->getAdapter()->log);
+        ], $this->repository->getAdapter()->getConnection()->log);
     }
 
 
@@ -61,7 +62,7 @@ class MigrateUpDownTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals([
             'M3: UP',
             "INSERT INTO table_name (name, in_transaction, down) VALUES ('migration-no-trans.sql', 0, 'M3: DOWN')",
-        ], $this->repository->getAdapter()->log);
+        ], $this->repository->getAdapter()->getConnection()->log);
     }
 
 
@@ -70,20 +71,24 @@ class MigrateUpDownTest extends \PHPUnit_Framework_TestCase
      */
     public function testUpException()
     {
-        $adapter = new TestDbAdapter;
-        $adapter->throwExceptionOnCallNum = 3;
+        $adapter = new DbAdapter($con = new TestDbConnection());
+        $con->throwExceptionOnCallNum = 3;
 
         $this->repository = new DbRepository('table_name', $adapter);
         $migrator = new MigrationService(new FileRepository(__DIR__ . '/fixtures'), $this->repository);
 
-        $migrator->up(new Migration(null, 'migration2.sql'));
+        try {
+            $migrator->up(new Migration(null, 'migration2.sql'));
+            $this->fail('Expected exception');
+        } catch (TestDbException $e) {
+        }
 
         $this->assertEquals([
             'BEGIN',
             'M2: UP-1',
             'M2: UP-2',
             'ROLLBACK',
-        ], $this->repository->getAdapter()->log);
+        ], $this->repository->getAdapter()->getConnection()->log);
     }
 
 
@@ -97,7 +102,7 @@ class MigrateUpDownTest extends \PHPUnit_Framework_TestCase
 
         $m = new Migration(2, 'migration2.sql');
 
-        $this->repository->getAdapter()->returnValue = [
+        $this->repository->getAdapter()->getConnection()->returnValue = [
             ['M2: DOWN'],
         ];
         $migrator->down($m);
@@ -108,7 +113,7 @@ class MigrateUpDownTest extends \PHPUnit_Framework_TestCase
             'M2: DOWN',
             "DELETE FROM table_name WHERE id='2'",
             'COMMIT',
-        ], $this->repository->getAdapter()->log);
+        ], $this->repository->getAdapter()->getConnection()->log);
     }
 
 
@@ -123,7 +128,7 @@ class MigrateUpDownTest extends \PHPUnit_Framework_TestCase
         $m = new Migration(2, 'migration-no-trans.sql');
         $m->isTransaction(false);
 
-        $this->repository->getAdapter()->returnValue = [
+        $this->repository->getAdapter()->getConnection()->returnValue = [
             ['M3: DOWN'],
         ];
         $migrator->down($m);
@@ -132,6 +137,6 @@ class MigrateUpDownTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals([
             'M3: DOWN',
             "DELETE FROM table_name WHERE id='2'",
-        ], $this->repository->getAdapter()->log);
+        ], $this->repository->getAdapter()->getConnection()->log);
     }
 }

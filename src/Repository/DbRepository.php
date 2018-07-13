@@ -1,8 +1,7 @@
 <?php namespace Blade\Migrations\Repository;
 
-use Blade\Migrations\DbAdapterInterface;
+use Blade\Database\DbAdapter;
 use Blade\Migrations\Migration;
-
 
 class DbRepository
 {
@@ -12,7 +11,7 @@ class DbRepository
     private $tableName;
 
     /**
-     * @var DbAdapterInterface
+     * @var DbAdapter
      */
     private $adapter;
 
@@ -20,10 +19,10 @@ class DbRepository
     /**
      * Конструктор
      *
-     * @param string             $tableName
-     * @param DbAdapterInterface $db
+     * @param string    $tableName
+     * @param DbAdapter $db
      */
-    public function __construct($tableName, DbAdapterInterface $db)
+    public function __construct($tableName, DbAdapter $db)
     {
         $this->adapter = $db;
         $this->tableName = $tableName;
@@ -31,7 +30,7 @@ class DbRepository
 
 
     /**
-     * @return DbAdapterInterface
+     * @return DbAdapter
      */
     public function getAdapter()
     {
@@ -70,8 +69,8 @@ class DbRepository
         $id = (int) $id;
         if ($id) {
             $sql = sprintf("SELECT id, name, in_transaction, created_at FROM {$this->tableName} WHERE id=%d LIMIT 1", $id);
-            if ($data = $this->adapter->selectList($sql)) {
-                return $this->_make_model(current($data));
+            if ($row = $this->adapter->selectRow($sql)) {
+                return $this->_make_model($row);
             }
         }
         return null;
@@ -149,7 +148,7 @@ class DbRepository
      */
     public function loadSql(Migration $migration)
     {
-        $data = $this->adapter->selectList(sprintf("SELECT down FROM {$this->tableName} WHERE name='%s' LIMIT 1", $this->adapter->escape($migration->getName())));
+        $data = $this->adapter->selectAll(sprintf("SELECT down FROM {$this->tableName} WHERE name='%s' LIMIT 1", $this->adapter->escape($migration->getName())));
         if (!$data) {
             throw new \InvalidArgumentException(__METHOD__.": migration `{$migration->getName()}` not found DOWN data in Database");
         }

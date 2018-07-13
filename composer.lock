@@ -12,7 +12,7 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/maxim-oleinik/blade-database.git",
-                "reference": "107e50c2e7537ae88ac105ebb130c31a474b2315"
+                "reference": "a6bf0436f05bd61672adfed068c093dfa3c9baa3"
             },
             "require": {
                 "php": ">=7.0"
@@ -41,7 +41,7 @@
                 }
             ],
             "description": "PHP Database interface library",
-            "time": "2018-07-13T15:25:19+00:00"
+            "time": "2018-07-16T08:57:42+00:00"
         },
         {
             "name": "psr/log",
