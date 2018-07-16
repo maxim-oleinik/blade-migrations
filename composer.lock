@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c1462ebe64bb100c50300a1291968fa6",
+    "content-hash": "5a2ffc4daacb28d5366eafdfb23ce517",
     "packages": [
         {
             "name": "blade/database",
@@ -12,7 +12,7 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/maxim-oleinik/blade-database.git",
-                "reference": "a6bf0436f05bd61672adfed068c093dfa3c9baa3"
+                "reference": "755441b6829e18ea7058fd82e5651a779813d9cf"
             },
             "require": {
                 "php": ">=7.0"
@@ -41,7 +41,7 @@
                 }
             ],
             "description": "PHP Database interface library",
-            "time": "2018-07-16T08:57:42+00:00"
+            "time": "2018-07-16T08:19:36+00:00"
         },
         {
             "name": "psr/log",
@@ -1525,9 +1525,7 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "blade/database": 20
-    },
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {

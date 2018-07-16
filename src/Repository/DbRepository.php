@@ -88,7 +88,7 @@ class DbRepository
             $limit = ' LIMIT ' . $limit;
         }
         $sql ="SELECT id, name, in_transaction, created_at FROM {$this->tableName} ORDER BY id DESC" . $limit;
-        $data = $this->adapter->selectList($sql);
+        $data = $this->adapter->selectAll($sql);
 
         $result = [];
         foreach ($data as $row) {

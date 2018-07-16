@@ -10,7 +10,7 @@
   }],
   "require": {
     "php": ">=7.0",
-    "blade/database": "^0.2.0@dev",
+    "blade/database": "^0.2.0",
     "symfony/finder": "*",
     "psr/log": "~1.0"
   },

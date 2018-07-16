@@ -24,16 +24,14 @@ class TestDbConnection implements DbConnectionInterface
         return 1;
     }
 
-
-    public function select($sql, $bindings = []): \Traversable
+    public function each($sql, $bindings = [], callable $callback)
     {
-        if (!$this->returnValue) {
-            $this->returnValue = [];
+        if ($this->returnValue) {
+            foreach ($this->returnValue as $row) {
+                $callback($row);
+            }
         }
-        $result = new \ArrayIterator($this->returnValue);
-        return $result;
     }
-
 
     public function beginTransaction()
     {
