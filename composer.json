@@ -1,7 +1,7 @@
 {
   "name": "blade/migrations",
   "type": "library",
-  "description": "Raw SQL database migration tool for PHP app",
+  "description": "Raw SQL migration tool for PHP app",
   "keywords": ["migrations", "database", "db", "database migrations"],
   "license": "MIT",
   "authors": [{
@@ -10,8 +10,8 @@
   }],
   "require": {
     "php": ">=7.0",
-    "blade/database": "^0.2.0",
-    "symfony/finder": "*",
+    "blade/database": "^0.2.0@dev",
+    "symfony/finder": "^3.4.0",
     "psr/log": "~1.0"
   },
   "require-dev": {
