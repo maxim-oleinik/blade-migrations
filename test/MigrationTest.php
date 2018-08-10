@@ -19,6 +19,8 @@ class MigrationTest extends \PHPUnit_Framework_TestCase
             ['DOWN tag not found', '--BEGIN'],
             ['DOWN tag not found', '--UP'],
 
+            ['Expected TRANSACTION tag before UP tag', "--UP\n--TRANSACTION"],
+
             ['Expected BEGIN/UP tag first', '--DOWN'],
             ['Expected BEGIN/UP tag first', '--ROLLBACK'],
 
@@ -113,6 +115,7 @@ class MigrationTest extends \PHPUnit_Framework_TestCase
     {
         $m = new Migration(1, 'SomeName', '2017-01-01');
         $m->setSql("
+            --TRANSACTION
                 some text
             --BEGINNER - тег должен завершаться переносом строки
             --BEGIN  

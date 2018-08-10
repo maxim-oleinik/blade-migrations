@@ -5,15 +5,16 @@
  */
 class Migration
 {
-    const TAG_BEGIN     = '--BEGIN';
-    const TAG_ROLLBACK  = '--ROLLBACK';
-    const TAG_UP        = '--UP';
-    const TAG_DOWN      = '--DOWN';
+    const TAG_BEGIN       = '--BEGIN';
+    const TAG_ROLLBACK    = '--ROLLBACK';
+    const TAG_UP          = '--UP';
+    const TAG_DOWN        = '--DOWN';
+    const TAG_TRANSACTION = '--TRANSACTION';
 
     private $up = [];
     private $down = [];
     private $isRemove = false;
-    private $isTransaction = true;
+    private $isTransaction = false;
 
     private $id;
     private $name;
@@ -59,7 +60,6 @@ class Migration
 
             switch (trim($tag)) {
                 case self::TAG_UP:
-                    $this->isTransaction = false;
                     $tagDown = self::TAG_DOWN;
                 case self::TAG_BEGIN:
                     if (null !== $posUp) {
@@ -80,6 +80,13 @@ class Migration
                     $posDown = $position + strlen($tag);
                     $up   = trim(substr($sql, $posUp, $position - $posUp));
                     $down = trim(substr($sql, $posDown));
+                    break;
+
+                case self::TAG_TRANSACTION:
+                    if (null !== $posUp) {
+                        throw new \InvalidArgumentException(__METHOD__. ": Expected TRANSACTION tag before UP tag");
+                    }
+                    $this->isTransaction = true;
                     break;
             }
         }

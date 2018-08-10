@@ -103,7 +103,7 @@ class MigrateUpDownTest extends \PHPUnit_Framework_TestCase
         $m = new Migration(2, 'migration2.sql');
 
         $this->repository->getAdapter()->getConnection()->returnValue = [
-            ['M2: DOWN'],
+            ['down'=>'M2: DOWN', 'in_transaction'=>1],
         ];
         $migrator->down($m);
         $this->assertEquals(["M2: DOWN\n"], $logger->getLog());
@@ -129,7 +129,7 @@ class MigrateUpDownTest extends \PHPUnit_Framework_TestCase
         $m->isTransaction(false);
 
         $this->repository->getAdapter()->getConnection()->returnValue = [
-            ['M3: DOWN'],
+            ['down'=>'M3: DOWN', 'in_transaction'=>0],
         ];
         $migrator->down($m);
         $this->assertEquals(['NO TRANSACTION!', "M3: DOWN\n"], $logger->getLog());

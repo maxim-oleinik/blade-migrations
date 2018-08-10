@@ -1,3 +1,4 @@
+--TRANSACTION
 --BEGIN
 M2: UP-1;
 M2: UP-2;

@@ -148,13 +148,12 @@ class DbRepository
      */
     public function loadSql(Migration $migration)
     {
-        $data = $this->adapter->selectAll(sprintf("SELECT down FROM {$this->tableName} WHERE name='%s' LIMIT 1", $this->adapter->escape($migration->getName())));
-        if (!$data) {
+        $row = $this->adapter->selectRow(sprintf("SELECT down, in_transaction FROM {$this->tableName} WHERE name='%s' LIMIT 1", $this->adapter->escape($migration->getName())));
+        if (!$row) {
             throw new \InvalidArgumentException(__METHOD__.": migration `{$migration->getName()}` not found DOWN data in Database");
         }
 
-        $row = (array)current($data);
-        $migration->setDown(current($row));
+        $migration->setDown($row['down']);
+        $migration->isTransaction($row['in_transaction']);
     }
-
 }
