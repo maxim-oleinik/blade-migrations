@@ -38,6 +38,13 @@ class MigrationTest extends \PHPUnit_Framework_TestCase
                 --UP
                 --DOWN
             "],
+
+            ['Expected SEPARATOR tag before UP tag', "--UP\n--SEPARATOR=@"],
+            ['Expected SEPARATOR tag has value', "--SEPARATOR"],
+            ['Expected SEPARATOR tag has value', "--SEPARATOR\n--UP"],
+            ['Expected SEPARATOR tag has value', "--SEPARATOR=\n--UP"],
+            ['Expected SEPARATOR tag has value', "--SEPARATOR= \n--UP"],
+            ['Expected SEPARATOR tag has SINGLE CHAR value', "--SEPARATOR=AB"],
         ];
     }
 
@@ -150,5 +157,31 @@ class MigrationTest extends \PHPUnit_Framework_TestCase
             'Список запросов для Down');
 
         $this->assertFalse($m->isTransaction(), 'Миграция НЕ в Транзакции');
+    }
+
+
+    /**
+     * Альтернативный разделитель
+     */
+    public function testCustomSeparator()
+    {
+        $m = new Migration(1, 'SomeName', '2017-01-01');
+        $m->setSql("
+            --SEPARATOR=\
+            --UP
+            SELECT 1\
+            SELECT 2\
+
+            --DOWN
+            SELECT 3\
+            SELECT 4\
+            \\\\
+        ");
+
+        $this->assertEquals(["SELECT 1", 'SELECT 2'], $m->getUp(),
+            'Список запросов для UP');
+
+        $this->assertEquals(['SELECT 3', 'SELECT 4'], $m->getDown(),
+            'Список запросов для Down');
     }
 }

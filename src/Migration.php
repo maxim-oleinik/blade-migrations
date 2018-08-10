@@ -8,11 +8,13 @@ class Migration
     const TAG_UP          = '--UP';
     const TAG_DOWN        = '--DOWN';
     const TAG_TRANSACTION = '--TRANSACTION';
+    const TAG_SEPARATOR   = '--SEPARATOR';
 
     private $up   = [];
     private $down = [];
     private $isRemove = false;
     private $isTransaction = false;
+    private $separator = ';';
 
     private $id;
     private $name;
@@ -43,7 +45,7 @@ class Migration
         $sql = trim($sql);
         $this->sql = $sql;
 
-        preg_match_all('/--[A-Z]+(?:[\s]|$)/', $sql, $matches, PREG_OFFSET_CAPTURE);
+        preg_match_all('/(--[A-Z]+)(=.*)?(?:[\s]|$)?/', $sql, $matches, PREG_OFFSET_CAPTURE);
 
         $up   = null;
         $down = null;
@@ -51,11 +53,11 @@ class Migration
         $posUp   = null;
         $posDown = null;
 
-        foreach ($matches[0] as $data) {
+        foreach ($matches[1] as $i => $data) {
             list($tag, $position) = $data;
             $tag = trim($tag);
 
-            switch (trim($tag)) {
+            switch ($tag) {
                 case self::TAG_UP:
                     if (null !== $posUp) {
                         throw new \InvalidArgumentException(__METHOD__. ": Expected single {$tag} tag");
@@ -79,6 +81,22 @@ class Migration
                         throw new \InvalidArgumentException(__METHOD__. ": Expected TRANSACTION tag before UP tag");
                     }
                     $this->isTransaction = true;
+                    break;
+
+                case self::TAG_SEPARATOR:
+                    if (null !== $posUp) {
+                        throw new \InvalidArgumentException(__METHOD__. ": Expected SEPARATOR tag before UP tag");
+                    }
+                    $separator = null;
+                    if (isset($matches[2][$i][0])) {
+                        $separator = substr(trim($matches[2][$i][0]), 1);
+                    }
+                    if (!$separator) {
+                        throw new \InvalidArgumentException(__METHOD__. ": Expected SEPARATOR tag has value");
+                    } elseif (strlen($separator) > 1) {
+                        throw new \InvalidArgumentException(__METHOD__. ": Expected SEPARATOR tag has SINGLE CHAR value");
+                    }
+                    $this->separator = $separator;
                     break;
             }
         }
@@ -208,7 +226,7 @@ class Migration
      */
     private function _parse_sql($sql)
     {
-        return array_values(array_filter(array_map('trim',
-            preg_split("/;[\s]*\n/", rtrim(trim($sql), ';')))));
+        return array_values(array_filter(array_map(function ($value) { return trim(rtrim($value, $this->separator)); },
+            preg_split(sprintf("/%s[\s]*\n/", preg_quote($this->separator)), rtrim(trim($sql), $this->separator)))));
     }
 }
