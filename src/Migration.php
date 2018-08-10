@@ -5,13 +5,11 @@
  */
 class Migration
 {
-    const TAG_BEGIN       = '--BEGIN';
-    const TAG_ROLLBACK    = '--ROLLBACK';
     const TAG_UP          = '--UP';
     const TAG_DOWN        = '--DOWN';
     const TAG_TRANSACTION = '--TRANSACTION';
 
-    private $up = [];
+    private $up   = [];
     private $down = [];
     private $isRemove = false;
     private $isTransaction = false;
@@ -25,9 +23,9 @@ class Migration
     /**
      * Конструктор
      *
-     * @param      $id
-     * @param      $name
-     * @param      $date
+     * @param int    $id
+     * @param string $name
+     * @param string $date
      */
     public function __construct($id, $name, $date = null)
     {
@@ -47,11 +45,10 @@ class Migration
 
         preg_match_all('/--[A-Z]+(?:[\s]|$)/', $sql, $matches, PREG_OFFSET_CAPTURE);
 
-        $up = null;
+        $up   = null;
         $down = null;
 
-        $tagDown = self::TAG_ROLLBACK;
-        $posUp = null;
+        $posUp   = null;
         $posDown = null;
 
         foreach ($matches[0] as $data) {
@@ -60,20 +57,15 @@ class Migration
 
             switch (trim($tag)) {
                 case self::TAG_UP:
-                    $tagDown = self::TAG_DOWN;
-                case self::TAG_BEGIN:
                     if (null !== $posUp) {
                         throw new \InvalidArgumentException(__METHOD__. ": Expected single {$tag} tag");
                     }
                     $posUp = $position + strlen($tag);
                     break;
 
-                case self::TAG_ROLLBACK:
                 case self::TAG_DOWN:
                     if (null === $posUp) {
-                        throw new \InvalidArgumentException(__METHOD__. ": Expected BEGIN/UP tag first");
-                    } elseif ($tag != $tagDown) {
-                        throw new \InvalidArgumentException(__METHOD__. ": Expected `{$tagDown}`, got `{$tag}` tag");
+                        throw new \InvalidArgumentException(__METHOD__. ": Expected UP tag first");
                     } elseif (null !== $posDown) {
                         throw new \InvalidArgumentException(__METHOD__. ": Expected single {$tag} tag");
                     }
@@ -92,10 +84,10 @@ class Migration
         }
 
         if (null === $posUp) {
-            throw new \InvalidArgumentException(__METHOD__. ": BEGIN/UP tag not found");
+            throw new \InvalidArgumentException(__METHOD__. ": UP tag not found");
         }
         if (null === $posDown) {
-            throw new \InvalidArgumentException(__METHOD__. ": ROLLBACK/DOWN tag not found");
+            throw new \InvalidArgumentException(__METHOD__. ": DOWN tag not found");
         }
 
         $this->setUp($up);

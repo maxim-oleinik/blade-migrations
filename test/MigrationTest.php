@@ -16,27 +16,15 @@ class MigrationTest extends \PHPUnit_Framework_TestCase
             ['UP tag not found', ''],
             ['UP tag not found', 'SELECT 1'],
 
-            ['DOWN tag not found', '--BEGIN'],
             ['DOWN tag not found', '--UP'],
 
             ['Expected TRANSACTION tag before UP tag', "--UP\n--TRANSACTION"],
 
-            ['Expected BEGIN/UP tag first', '--DOWN'],
-            ['Expected BEGIN/UP tag first', '--ROLLBACK'],
+            ['Expected UP tag first', '--DOWN'],
 
-            ['Expected BEGIN/UP tag first', "
-                --ROLLBACK
-                --BEGIN
-            "],
-
-            ['Expected `--DOWN`, got `--ROLLBACK`', "
-                --UP
-                --ROLLBACK
-            "],
-
-            ['Expected `--ROLLBACK`, got `--DOWN`', "
-                --BEGIN
+            ['Expected UP tag first', "
                 --DOWN
+                --UP
             "],
 
             ['Expected single --DOWN tag', "
@@ -74,8 +62,8 @@ class MigrationTest extends \PHPUnit_Framework_TestCase
     {
         $m = new Migration(1, 'SomeName', '2017-01-01');
         $m->setSql("
-            --BEGIN
-            --ROLLBACK
+            --UP
+            --DOWN
         ");
 
         $this->assertSame([], $m->getUp(),'Список запросов для UP');
@@ -92,10 +80,10 @@ class MigrationTest extends \PHPUnit_Framework_TestCase
     {
         $m = new Migration(1, 'SomeName', '2017-01-01');
         $m->setSql("
-            --BEGIN
+            --UP
             SELECT 1;
 
-            --ROLLBACK
+            --DOWN
             SELECT 2
         ");
 
@@ -117,20 +105,20 @@ class MigrationTest extends \PHPUnit_Framework_TestCase
         $m->setSql("
             --TRANSACTION
                 some text
-            --BEGINNER - тег должен завершаться переносом строки
-            --BEGIN  
+            --UPNER - тег должен завершаться переносом строки
+            --UP  
             SELECT ';', 1;
 
             SELECT 2;
             ;
             ;
-            --ROLLBACKCOMMENT
-            --ROLLBACK
+            --DOWNCOMMENT
+            --DOWN
             SELECT 11; 
             SELECT 22;
         ");
 
-        $this->assertEquals(["SELECT ';', 1", 'SELECT 2', '--ROLLBACKCOMMENT'], $m->getUp(),
+        $this->assertEquals(["SELECT ';', 1", 'SELECT 2', '--DOWNCOMMENT'], $m->getUp(),
             'Список запросов для UP');
 
         $this->assertEquals(['SELECT 11', 'SELECT 22'], $m->getDown(),

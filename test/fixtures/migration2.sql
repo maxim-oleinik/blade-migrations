@@ -1,8 +1,8 @@
 --TRANSACTION
---BEGIN
+--UP
 M2: UP-1;
 M2: UP-2;
 
---ROLLBACK
+--DOWN
 M2: DOWN-1;
 M2: DOWN-2;
