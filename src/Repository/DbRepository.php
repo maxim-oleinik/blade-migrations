@@ -3,6 +3,9 @@
 use Blade\Database\DbAdapter;
 use Blade\Migrations\Migration;
 
+/**
+ * Доступ к миграциям сохраненным в БД
+ */
 class DbRepository
 {
     /**
@@ -70,7 +73,7 @@ class DbRepository
         if ($id) {
             $sql = sprintf("SELECT id, name, in_transaction, created_at FROM {$this->tableName} WHERE id=%d LIMIT 1", $id);
             if ($row = $this->adapter->selectRow($sql)) {
-                return $this->_make_model($row);
+                return $this->_makeModel($row);
             }
         }
         return null;
@@ -80,6 +83,7 @@ class DbRepository
     /**
      * Получить список всех Миграций
      *
+     * @param  int $limit
      * @return Migration[]
      */
     public function items($limit = null)
@@ -92,7 +96,7 @@ class DbRepository
 
         $result = [];
         foreach ($data as $row) {
-            $result[] = $this->_make_model($row);
+            $result[] = $this->_makeModel($row);
         }
 
         return $result;
@@ -103,7 +107,7 @@ class DbRepository
      * @param $row
      * @return \Blade\Migrations\Migration
      */
-    private function _make_model($row)
+    private function _makeModel($row)
     {
         $row = array_values((array)$row);
         $m = new Migration($row[0], $row[1], $row[3]);

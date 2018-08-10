@@ -2,11 +2,13 @@
 
 use Blade\Migrations\Migration;
 
-
+/**
+ * Доступ к миграциям сохраненным в файлах
+ */
 class FileRepository
 {
     /**
-     * @var string - DB table name
+     * @var string - Path to Migrations dir
      */
     private $dir;
 
@@ -47,9 +49,9 @@ class FileRepository
      */
     public function insert(Migration $migration)
     {
-        $fileName = $this->dir . DIRECTORY_SEPARATOR . $migration->getName();
+        $fileName = $this->_getFileName($migration);
         if (is_file($fileName)) {
-            throw new \InvalidArgumentException(__METHOD__.": migration file `{$migration->getName()}` exists");
+            throw new \InvalidArgumentException(__METHOD__.": Migration file `{$migration->getName()}` exists");
         }
 
         file_put_contents($fileName, $migration->getSql());
@@ -63,11 +65,25 @@ class FileRepository
      */
     public function loadSql(Migration $migration)
     {
-        $fileName = $this->dir . DIRECTORY_SEPARATOR . $migration->getName();
+        $fileName = $this->_getFileName($migration);
         if (!is_file($fileName)) {
             throw new \InvalidArgumentException(__METHOD__.": migration file `{$migration->getName()}` not found in dir `{$this->dir}`");
         }
         $migration->setSql(file_get_contents($fileName));
     }
 
+
+    /**
+     * @param  Migration $migration
+     * @return string
+     */
+    private function _getFileName(Migration $migration): string
+    {
+        if (!$migration->getName()) {
+            throw new \InvalidArgumentException(__METHOD__ . ": Expected Migration has Name");
+        }
+
+        $fileName = $this->dir . DIRECTORY_SEPARATOR . $migration->getName();
+        return $fileName;
+    }
 }

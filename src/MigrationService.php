@@ -4,7 +4,6 @@ use Psr\Log\LoggerInterface;
 use Blade\Migrations\Repository\DbRepository;
 use Blade\Migrations\Repository\FileRepository;
 
-
 /**
  * @see \Blade\Migrations\Test\MigrateStatusTest
  * @see \Blade\Migrations\Test\MigrateUpDownTest
@@ -123,20 +122,15 @@ class MigrationService implements \Psr\Log\LoggerAwareInterface
             $this->getDbRepository()->insert($migration);
         };
 
-        if ($migration->isTransaction()) {
-            $this->getDbRepository()->getAdapter()->transaction($func);
-        } else {
-            $this->logger->alert('NO TRANSACTION!');
-            $func();
-        }
+        $this->_processMigration($migration, $func);
     }
 
 
     /**
      * DOWN
      *
-     * @param \Blade\Migrations\Migration $migration
-     * @param bool                        $loadFromFile
+     * @param Migration $migration
+     * @param bool      $loadFromFile
      */
     public function down(Migration $migration, $loadFromFile = false)
     {
@@ -151,11 +145,24 @@ class MigrationService implements \Psr\Log\LoggerAwareInterface
             $this->dbRepository->delete($migration);
         };
 
+        $this->_processMigration($migration, $func);
+    }
+
+
+    /**
+     * Выполнить миграцию
+     *
+     * @param Migration $migration
+     * @param callable  $command
+     * @throws \Exception
+     */
+    private function _processMigration(Migration $migration, callable $command)
+    {
         if ($migration->isTransaction()) {
-            $this->getDbRepository()->getAdapter()->transaction($func);
+            $this->getDbRepository()->getAdapter()->transaction($command);
         } else {
             $this->logger->alert('NO TRANSACTION!');
-            $func();
+            $command();
         }
     }
 
