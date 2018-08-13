@@ -81,6 +81,22 @@ class DbRepository
 
 
     /**
+     * FindLast
+     *
+     * @return \Blade\Migrations\Migration|null
+     */
+    public function findLast()
+    {
+        $sql = sprintf("SELECT id, name, in_transaction, created_at FROM {$this->tableName} ORDER BY id DESC LIMIT 1");
+        if ($row = $this->adapter->selectRow($sql)) {
+            return $this->_makeModel($row);
+        }
+
+        return null;
+    }
+
+
+    /**
      * Получить список всех Миграций
      *
      * @param  int $limit
