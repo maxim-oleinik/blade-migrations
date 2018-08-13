@@ -86,6 +86,7 @@ class MigrateStatusTest extends \PHPUnit_Framework_TestCase
         ], $result);
 
         $this->assertEquals([$m3, $m4, $m2], $migrator->getDiff());
+        $this->assertEquals([$m4, $m2], $migrator->getDiff(true), 'Показать только Новые миграции');
     }
 
 }

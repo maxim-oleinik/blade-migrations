@@ -84,16 +84,17 @@ class MigrationService implements \Psr\Log\LoggerAwareInterface
 
 
     /**
+     * @param bool $onlyNew - Показать только Новые Миграции на добавление (на Удаление не показывать)
      * @return Migration[]
      */
-    public function getDiff()
+    public function getDiff($onlyNew = false)
     {
         $up = [];
         $down = [];
         foreach ($this->status() as $migration) {
             if ($migration->isNew()) {
                 $up[] = $migration;
-            } else if ($migration->isRemove()) {
+            } else if (!$onlyNew && $migration->isRemove()) {
                 $down[] = $migration;
             }
         }
@@ -161,7 +162,9 @@ class MigrationService implements \Psr\Log\LoggerAwareInterface
         if ($migration->isTransaction()) {
             $this->getDbRepository()->getAdapter()->transaction($command);
         } else {
-            $this->logger->alert('NO TRANSACTION!');
+            if ($this->logger) {
+                $this->logger->alert('NO TRANSACTION!');
+            }
             $command();
         }
     }
