@@ -1,11 +1,13 @@
-<?php namespace Blade\Migrations\Test;
+<?php namespace Test\Blade\Migrations;
 
 use Blade\Database\DbAdapter;
 use Blade\Migrations\Migration;
 use Blade\Migrations\Repository\DbRepository;
 use Blade\Migrations\MigrationService;
 use Blade\Migrations\Repository\FileRepository;
-
+use Blade\Migrations\Test\TestDbConnection;
+use Blade\Migrations\Test\TestDbException;
+use Blade\Migrations\Test\TestLogger;
 
 /**
  * @see \Blade\Migrations\MigrationService
@@ -32,7 +34,7 @@ class MigrateUpDownTest extends \PHPUnit_Framework_TestCase
      */
     public function testUpCommand()
     {
-        $migrator = new MigrationService(new FileRepository(__DIR__ . '/fixtures'), $this->repository);
+        $migrator = new MigrationService(new FileRepository(__DIR__ . '/../fixtures'), $this->repository);
         $migrator->setLogger($logger = new TestLogger);
 
         $migrator->up(new Migration(null, 'migration2.sql'));
@@ -53,7 +55,7 @@ class MigrateUpDownTest extends \PHPUnit_Framework_TestCase
      */
     public function testUpNoTransaction()
     {
-        $migrator = new MigrationService(new FileRepository(__DIR__ . '/fixtures'), $this->repository);
+        $migrator = new MigrationService(new FileRepository(__DIR__ . '/../fixtures'), $this->repository);
         $migrator->setLogger($logger = new TestLogger);
 
         $migrator->up(new Migration(null, 'migration-no-trans.sql'));
@@ -75,7 +77,7 @@ class MigrateUpDownTest extends \PHPUnit_Framework_TestCase
         $con->throwExceptionOnCallNum = 3;
 
         $this->repository = new DbRepository('table_name', $adapter);
-        $migrator = new MigrationService(new FileRepository(__DIR__ . '/fixtures'), $this->repository);
+        $migrator = new MigrationService(new FileRepository(__DIR__ . '/../fixtures'), $this->repository);
 
         try {
             $migrator->up(new Migration(null, 'migration2.sql'));
@@ -97,7 +99,7 @@ class MigrateUpDownTest extends \PHPUnit_Framework_TestCase
      */
     public function testDownCommand()
     {
-        $migrator = new MigrationService(new FileRepository(__DIR__ . '/fixtures'), $this->repository);
+        $migrator = new MigrationService(new FileRepository(__DIR__ . '/../fixtures'), $this->repository);
         $migrator->setLogger($logger = new TestLogger);
 
         $m = new Migration(2, 'migration2.sql');
@@ -122,7 +124,7 @@ class MigrateUpDownTest extends \PHPUnit_Framework_TestCase
      */
     public function testDownNoTransaction()
     {
-        $migrator = new MigrationService(new FileRepository(__DIR__ . '/fixtures'), $this->repository);
+        $migrator = new MigrationService(new FileRepository(__DIR__ . '/../fixtures'), $this->repository);
         $migrator->setLogger($logger = new TestLogger);
 
         $m = new Migration(2, 'migration-no-trans.sql');

@@ -1,4 +1,4 @@
-<?php namespace Blade\Migrations\Test;
+<?php namespace Test\Blade\Migrations;
 
 use \Blade\Migrations\Migration;
 

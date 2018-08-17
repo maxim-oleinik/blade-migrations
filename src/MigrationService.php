@@ -5,8 +5,8 @@ use Blade\Migrations\Repository\DbRepository;
 use Blade\Migrations\Repository\FileRepository;
 
 /**
- * @see \Blade\Migrations\Test\MigrateStatusTest
- * @see \Blade\Migrations\Test\MigrateUpDownTest
+ * @see \Test\Blade\Migrations\MigrateStatusTest
+ * @see \Test\Blade\Migrations\MigrateUpDownTest
  */
 class MigrationService implements \Psr\Log\LoggerAwareInterface
 {

@@ -1,7 +1,7 @@
 <?php namespace Blade\Migrations;
 
 /**
- * @see \Blade\Migrations\Test\MigrationTest
+ * @see \Test\Blade\Migrations\MigrationTest
  */
 class Migration
 {

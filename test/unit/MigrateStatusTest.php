@@ -1,4 +1,4 @@
-<?php namespace Blade\Migrations\Test;
+<?php namespace Test\Blade\Migrations;
 
 use Blade\Migrations\Migration;
 use Blade\Migrations\Repository\DbRepository;
@@ -26,7 +26,7 @@ class MigrateStatusTest extends \PHPUnit_Framework_TestCase
      */
     public function testStatusNoMigrations()
     {
-        $migrator = new MigrationService(new FileRepository(__DIR__ . '/fixtures/empty_dir'), $this->repository);
+        $migrator = new MigrationService(new FileRepository(__DIR__ . '/../fixtures/empty_dir'), $this->repository);
         $this->repository->expects($this->any())
             ->method('items')
             ->will($this->returnValue([]));
@@ -42,7 +42,7 @@ class MigrateStatusTest extends \PHPUnit_Framework_TestCase
      */
     public function testStatusUp()
     {
-        $migrator = new MigrationService(new FileRepository(__DIR__ . '/fixtures'), $this->repository);
+        $migrator = new MigrationService(new FileRepository(__DIR__ . '/../fixtures'), $this->repository);
 
         $this->repository->expects($this->any())
             ->method('items')
@@ -75,7 +75,7 @@ class MigrateStatusTest extends \PHPUnit_Framework_TestCase
         $m33 = clone $m3;
         $m33->isRemove(true);
 
-        $migrator = new MigrationService(new FileRepository(__DIR__ . '/fixtures'), $this->repository);
+        $migrator = new MigrationService(new FileRepository(__DIR__ . '/../fixtures'), $this->repository);
         $result = $migrator->status();
         // Накатить М2 и откатить М3
         $this->assertEquals([
@@ -88,5 +88,4 @@ class MigrateStatusTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals([$m3, $m4, $m2], $migrator->getDiff());
         $this->assertEquals([$m4, $m2], $migrator->getDiff(true), 'Показать только Новые миграции');
     }
-
 }
