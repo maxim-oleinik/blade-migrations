@@ -62,15 +62,35 @@ class MigrateOperation extends BaseOperation
      * @param callable|null $confirmationCallback - Спросить подтверждение у пользователя перед запуском каждой миграции
      *                                            функция должна вернуть true/false
      *                                            принимает $migrationTitle
+     * @param string        $migrationName - Название миграции которую надо явно запустить
      */
-    public function run(callable $confirmationCallback = null)
+    public function run(callable $confirmationCallback = null, $migrationName = null)
     {
         if ($this->logger) {
             $this->service->setLogger($this->logger);
         }
 
-        // Получить список миграций для запуска
-        $migrations = $this->service->getDiff(!$this->optAuto); // только новые
+        // Выбранную миграцию
+        if ($migrationName) {
+            if (strpos($migrationName, DIRECTORY_SEPARATOR) !== false) {
+                $migrationName = basename($migrationName);
+            }
+            $migrations = [];
+            foreach ($this->service->getDiff(true) as $migration) {
+                if ($migration->getName() == $migrationName) {
+                    $migrations[] = $migration;
+                }
+            }
+            if (!$migrations) {
+                $this->alert("<error>Migration `{$migrationName}` not found or applied already</error>");
+                return;
+            }
+
+        // Все миграции по списку
+        } else {
+            $migrations = $this->service->getDiff(!$this->optAuto); // только новые
+        }
+
 
         if (!$migrations) {
             $this->alert('<error>Nothing to migrate</error>');

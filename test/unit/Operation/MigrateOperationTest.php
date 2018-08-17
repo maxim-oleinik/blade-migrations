@@ -78,6 +78,46 @@ class MigrateOperationTest extends \PHPUnit_Framework_TestCase
 
 
     /**
+     * 2 миграции вверх - выполняем Вторую по требованию
+     */
+    public function testTwoMigrationsUpRunSecondOnDemand()
+    {
+        $this->service->expects($this->once())
+            ->method('getDiff')
+            ->will($this->returnValue([
+                $m1 = new Migration(null, 'M1'),
+                $m2 = new Migration(null, 'M2'),
+            ]));
+
+        $this->service->expects($this->once())
+            ->method('up')
+            ->with($m2);
+
+        $this->cmd->run(null, $m2->getName());
+
+        $this->assertSame(['Done'], $this->logger->getLog());
+    }
+
+
+    /**
+     * Выбранная миграция не найдена
+     */
+    public function testUpSelectedMigrationNotFound()
+    {
+        $this->service->expects($this->once())
+            ->method('getDiff')
+            ->will($this->returnValue([
+            ]));
+
+        $this->service->expects($this->never())->method('up');
+
+        $this->cmd->run(null, 'UnknownMigration');
+
+        $this->assertSame(["<error>Migration `UnknownMigration` not found or applied already</error>"], $this->logger->getLog());
+    }
+
+
+    /**
      * 2 миграции вверх - выполняем обе
      */
     public function testTwoMigrationsUpRunAll()
