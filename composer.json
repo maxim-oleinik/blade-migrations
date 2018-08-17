@@ -9,7 +9,7 @@
     "email": "maxim.oleinik@gmail.com"
   }],
   "require": {
-    "php": ">=7.0",
+    "php": "7.*",
     "blade/database": "^0.2.0@dev",
     "symfony/finder": "^3.4.0",
     "psr/log": "~1.0"
