@@ -10,6 +10,9 @@ vendor/composer/installed.json: composer.json
 
 
 # Тесты
-test: vendor/composer/installed.json
+phpunit.xml:
+	cp phpunit-dist.xml phpunit.xml
+
+test: vendor/composer/installed.json phpunit.xml
 	@echo
 	-./vendor/bin/phpunit
