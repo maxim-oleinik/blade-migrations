@@ -15,11 +15,6 @@ use Blade\Migrations\Test\TestLogger;
 abstract class BaseAcceptanceScenarioTest extends \PHPUnit_Framework_TestCase
 {
     /**
-     * @var bool - Allow run CREATE TABLE in transaction
-     */
-    protected $allowDdlTransactions = true;
-
-    /**
      * @param \Blade\Database\DbConnectionInterface $connection
      */
     public function runScenario(DbConnectionInterface $connection)
@@ -40,17 +35,8 @@ abstract class BaseAcceptanceScenarioTest extends \PHPUnit_Framework_TestCase
         $opRollback->setLogger($logger);
 
         try {
-            if ($this->allowDdlTransactions) {
-                $db->beginTransaction();
-            }
-
             $baseSql = SqlBuilder::make()->from($tableName);
             $repoDb->install();
-
-            if (!$this->allowDdlTransactions) {
-                $db->beginTransaction();
-            }
-
 
             /**
              * Начальный статус
@@ -91,7 +77,7 @@ abstract class BaseAcceptanceScenarioTest extends \PHPUnit_Framework_TestCase
              * A - 03.sql
              */
             $mUnknown = new Migration(null, 'Unknown');
-            $mUnknown->setSql("--UP\n--DOWN\nselect 1");
+            $mUnknown->setSql("--UP\n--DOWN\n");
             $repoDb->insert($mUnknown);
             $this->_assertStatus([
                 ['Y', 'id', 'date', "02.sql"],
@@ -177,10 +163,28 @@ abstract class BaseAcceptanceScenarioTest extends \PHPUnit_Framework_TestCase
             $this->assertEquals(22, $row['test_col2'], 'Была добавлена колонка с дефолтом 22');
             $this->assertFalse(isset($row['test_col1']), 'Колонка 1 была удалена');
 
+
+            /**
+             * DbRepository
+             *
+             * Y - 02.sql
+             * Y - 01.sql
+             * Y - 03.sql
+             */
+            $items = $repoDb->items();
+            $this->assertEquals('03.sql', $items[0]->getName());
+            $this->assertEquals('01.sql', $items[1]->getName());
+            $this->assertEquals('02.sql', $items[2]->getName());
+
+            $m = $repoDb->findLast();
+            $this->assertEquals('03.sql', $m->getName());
+
+            $m = $repoDb->findById($items[1]->getId());
+            $this->assertEquals($items[1]->getName(), $m->getName());
+
         } catch (\Exception $e) {
         }
 
-        $db->rollBack(true);
         $db->execute("DROP TABLE IF EXISTS {$tableName}");
 
         if (isset($e)) {

@@ -50,9 +50,9 @@ class DbRepository
             CREATE TABLE {$this->tableName}
             (
               id serial NOT NULL PRIMARY KEY,
-              created_at timestamp (0) without time zone NOT NULL DEFAULT now(),
+              created_at timestamp (0) NOT NULL DEFAULT now(),
               in_transaction INT NOT NULL,
-              name character varying (255) NOT NULL,
+              name VARCHAR(255) NOT NULL,
               down TEXT NOT NULL
             );
         ";
