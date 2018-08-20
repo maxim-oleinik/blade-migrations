@@ -63,9 +63,9 @@ class MigrationService implements \Psr\Log\LoggerAwareInterface
     public function status()
     {
         // Найти все файлы миграций
-        $files = $this->fileRepository->items();
+        $files = $this->fileRepository->all();
 
-        $migrations = $this->dbRepository->items();
+        $migrations = $this->dbRepository->all();
         $nameIndex = [];
         foreach ($migrations as $migration) {
             $nameIndex[$migration->getName()] = $migration;

@@ -29,7 +29,7 @@ class FileRepository
      *
      * @return array - FILE => PATH
      */
-    public function items()
+    public function all()
     {
         $finder = new \Symfony\Component\Finder\Finder;
         $finder->files()->in($this->dir)->sortByName();

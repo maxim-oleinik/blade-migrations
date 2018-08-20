@@ -99,15 +99,11 @@ class DbRepository
     /**
      * Получить список всех Миграций
      *
-     * @param  int $limit
      * @return Migration[]
      */
-    public function items($limit = null)
+    public function all()
     {
-        if ($limit) {
-            $limit = ' LIMIT ' . $limit;
-        }
-        $sql ="SELECT id, name, in_transaction, created_at FROM {$this->tableName} ORDER BY id DESC" . $limit;
+        $sql ="SELECT id, name, in_transaction, created_at FROM {$this->tableName} ORDER BY id DESC";
         $data = $this->adapter->selectAll($sql);
 
         $result = [];

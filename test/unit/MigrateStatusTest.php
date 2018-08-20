@@ -28,7 +28,7 @@ class MigrateStatusTest extends \PHPUnit_Framework_TestCase
     {
         $migrator = new MigrationService(new FileRepository(__DIR__ . '/../fixtures/empty_dir'), $this->repository);
         $this->repository->expects($this->any())
-            ->method('items')
+            ->method('all')
             ->will($this->returnValue([]));
 
         $result = $migrator->status();
@@ -45,7 +45,7 @@ class MigrateStatusTest extends \PHPUnit_Framework_TestCase
         $migrator = new MigrationService(new FileRepository(__DIR__ . '/../fixtures'), $this->repository);
 
         $this->repository->expects($this->any())
-            ->method('items')
+            ->method('all')
             ->will($this->returnValue([]));
 
         $result = $migrator->status();
@@ -66,7 +66,7 @@ class MigrateStatusTest extends \PHPUnit_Framework_TestCase
     {
         // В базе зафиксированы 2 миграции
         $this->repository->expects($this->any())
-            ->method('items')
+            ->method('all')
             ->will($this->returnValue([
                 $m1 = new Migration(1, 'migration1.sql', null),
                 $m3 = new Migration(3, 'migration3.sql', null),

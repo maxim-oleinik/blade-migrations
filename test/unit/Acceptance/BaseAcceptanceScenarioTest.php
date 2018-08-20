@@ -171,7 +171,7 @@ abstract class BaseAcceptanceScenarioTest extends \PHPUnit_Framework_TestCase
              * Y - 01.sql
              * Y - 03.sql
              */
-            $items = $repoDb->items();
+            $items = $repoDb->all();
             $this->assertEquals('03.sql', $items[0]->getName());
             $this->assertEquals('01.sql', $items[1]->getName());
             $this->assertEquals('02.sql', $items[2]->getName());
