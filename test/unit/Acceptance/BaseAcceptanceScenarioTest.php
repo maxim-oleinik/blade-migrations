@@ -146,6 +146,19 @@ abstract class BaseAcceptanceScenarioTest extends \PHPUnit_Framework_TestCase
 
 
             /**
+             * Добавим ВТОРУЮ отсутсвующую миграцию
+             */
+            $m2Unknown = new Migration(null, 'Unknown2');
+            $m2Unknown->setSql("--UP\n--DOWN\n");
+            $repoDb->insert($m2Unknown);
+            // что вернет getDiff для отсутствующих миграций
+            $diff = $service->getDiff();
+            $this->assertEquals('Unknown2', $diff[0]->getName());
+            $this->assertEquals('Unknown', $diff[1]->getName());
+            $this->assertEquals('03.sql', $diff[2]->getName());
+
+
+            /**
              * Auto - откат Unknown и добавить Миграцию 3
              *
              * Y - 02.sql
