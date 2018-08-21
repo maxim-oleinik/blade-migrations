@@ -51,9 +51,8 @@ class DbRepository
             (
               id serial NOT NULL PRIMARY KEY,
               created_at timestamp (0) NOT NULL DEFAULT now(),
-              in_transaction INT NOT NULL,
               name VARCHAR(255) NOT NULL,
-              down TEXT NOT NULL
+              data TEXT NOT NULL
             );
         ";
 
@@ -71,7 +70,7 @@ class DbRepository
     {
         $id = (int) $id;
         if ($id) {
-            $sql = sprintf("SELECT id, name, in_transaction, created_at FROM {$this->tableName} WHERE id=%d LIMIT 1", $id);
+            $sql = sprintf("SELECT id, name, created_at FROM {$this->tableName} WHERE id=%d LIMIT 1", $id);
             if ($row = $this->adapter->selectRow($sql)) {
                 return $this->_makeModel($row);
             }
@@ -87,7 +86,7 @@ class DbRepository
      */
     public function findLast()
     {
-        $sql = sprintf("SELECT id, name, in_transaction, created_at FROM {$this->tableName} ORDER BY id DESC LIMIT 1");
+        $sql = sprintf("SELECT id, name, created_at FROM {$this->tableName} ORDER BY id DESC LIMIT 1");
         if ($row = $this->adapter->selectRow($sql)) {
             return $this->_makeModel($row);
         }
@@ -103,7 +102,7 @@ class DbRepository
      */
     public function all()
     {
-        $sql ="SELECT id, name, in_transaction, created_at FROM {$this->tableName} ORDER BY id DESC";
+        $sql ="SELECT id, name, created_at FROM {$this->tableName} ORDER BY id DESC";
         $data = $this->adapter->selectAll($sql);
 
         $result = [];
@@ -122,8 +121,7 @@ class DbRepository
     private function _makeModel($row)
     {
         $row = array_values((array)$row);
-        $m = new Migration($row[0], $row[1], $row[3]);
-        $m->isTransaction($row[2]);
+        $m = new Migration($row[0], $row[1], $row[2]);
         return $m;
     }
 
@@ -135,12 +133,10 @@ class DbRepository
      */
     public function insert(Migration $migration)
     {
-        $sql = sprintf("INSERT INTO {$this->tableName} (name, in_transaction, down) VALUES ('%s', %d, '%s')",
+        $sql = sprintf("INSERT INTO {$this->tableName} (name, data) VALUES ('%s', '%s')",
             $this->adapter->escape($migration->getName()),
-            $migration->isTransaction()?1:0,
-            $this->adapter->escape(implode(";\n", $migration->getDown()))
+            $this->adapter->escape($migration->getSql())
         );
-
         $this->getAdapter()->execute($sql);
     }
 
@@ -164,12 +160,11 @@ class DbRepository
      */
     public function loadSql(Migration $migration)
     {
-        $row = $this->adapter->selectRow(sprintf("SELECT down, in_transaction FROM {$this->tableName} WHERE name='%s' LIMIT 1", $this->adapter->escape($migration->getName())));
-        if (!$row) {
-            throw new \InvalidArgumentException(__METHOD__.": migration `{$migration->getName()}` not found DOWN data in Database");
+        $data = $this->adapter->selectValue(sprintf("SELECT data FROM {$this->tableName} WHERE name='%s' LIMIT 1", $this->adapter->escape($migration->getName())));
+        if (!$data) {
+            throw new \InvalidArgumentException(__METHOD__.": migration `{$migration->getName()}` not found in Database");
         }
 
-        $migration->setDown($row['down']);
-        $migration->isTransaction($row['in_transaction']);
+        $migration->setSql($data);
     }
 }

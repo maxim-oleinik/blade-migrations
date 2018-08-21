@@ -17,7 +17,22 @@ class MigrateUpDownTest extends \PHPUnit_Framework_TestCase
     /**
      * @var DbRepository
      */
-    private $repository;
+    private $dbRepository;
+
+    /**
+     * @var FileRepository
+     */
+    private $fileRepository;
+
+    /**
+     * @var MigrationService
+     */
+    private $service;
+
+    /**
+     * @var TestLogger
+     */
+    private $logger;
 
     /**
      * SetUp
@@ -25,28 +40,32 @@ class MigrateUpDownTest extends \PHPUnit_Framework_TestCase
     protected function setUp()
     {
         $adapter = new DbAdapter(new TestDbConnection());
-        $this->repository = new DbRepository('table_name', $adapter);
+        $this->dbRepository = new DbRepository('table_name', $adapter);
+        $this->fileRepository = new FileRepository(__DIR__ . '/../fixtures');
+        $this->service = new MigrationService($this->fileRepository, $this->dbRepository);
+        $this->service->setLogger($this->logger = new TestLogger);
     }
 
+    private function _getMigrationData($fileName)
+    {
+        return trim(file_get_contents(__DIR__ . '/../fixtures/' . $fileName));
+    }
 
     /**
      * UP command
      */
     public function testUpCommand()
     {
-        $migrator = new MigrationService(new FileRepository(__DIR__ . '/../fixtures'), $this->repository);
-        $migrator->setLogger($logger = new TestLogger);
-
-        $migrator->up(new Migration(null, 'migration2.sql'));
-        $this->assertEquals(["M2: UP-1\n", "M2: UP-2\n"], $logger->getLog());
+        $this->service->up(new Migration(null, 'migration2.sql'));
+        $this->assertEquals(["M2: UP-1\n", "M2: UP-2\n"], $this->logger->getLog());
 
         $this->assertEquals([
             'BEGIN',
             'M2: UP-1',
             'M2: UP-2',
-            "INSERT INTO table_name (name, in_transaction, down) VALUES ('migration2.sql', 1, 'M2: DOWN-1;\nM2: DOWN-2')",
+            "INSERT INTO table_name (name, data) VALUES ('migration2.sql', '".$this->_getMigrationData('migration2.sql')."')",
             'COMMIT',
-        ], $this->repository->getAdapter()->getConnection()->log);
+        ], $this->dbRepository->getAdapter()->getConnection()->log);
     }
 
 
@@ -55,16 +74,13 @@ class MigrateUpDownTest extends \PHPUnit_Framework_TestCase
      */
     public function testUpNoTransaction()
     {
-        $migrator = new MigrationService(new FileRepository(__DIR__ . '/../fixtures'), $this->repository);
-        $migrator->setLogger($logger = new TestLogger);
-
-        $migrator->up(new Migration(null, 'migration-no-trans.sql'));
-        $this->assertEquals(['NO TRANSACTION!',"M3: UP\n"], $logger->getLog());
+        $this->service->up(new Migration(null, 'migration-no-trans.sql'));
+        $this->assertEquals(['NO TRANSACTION!',"M3: UP\n"], $this->logger->getLog());
 
         $this->assertEquals([
             'M3: UP',
-            "INSERT INTO table_name (name, in_transaction, down) VALUES ('migration-no-trans.sql', 0, 'M3: DOWN')",
-        ], $this->repository->getAdapter()->getConnection()->log);
+            "INSERT INTO table_name (name, data) VALUES ('migration-no-trans.sql', '".$this->_getMigrationData('migration-no-trans.sql')."')",
+        ], $this->dbRepository->getAdapter()->getConnection()->log);
     }
 
 
@@ -76,8 +92,8 @@ class MigrateUpDownTest extends \PHPUnit_Framework_TestCase
         $adapter = new DbAdapter($con = new TestDbConnection());
         $con->throwExceptionOnCallNum = 3;
 
-        $this->repository = new DbRepository('table_name', $adapter);
-        $migrator = new MigrationService(new FileRepository(__DIR__ . '/../fixtures'), $this->repository);
+        $this->dbRepository = new DbRepository('table_name', $adapter);
+        $migrator = new MigrationService($this->fileRepository, $this->dbRepository);
 
         try {
             $migrator->up(new Migration(null, 'migration2.sql'));
@@ -90,7 +106,7 @@ class MigrateUpDownTest extends \PHPUnit_Framework_TestCase
             'M2: UP-1',
             'M2: UP-2',
             'ROLLBACK',
-        ], $this->repository->getAdapter()->getConnection()->log);
+        ], $this->dbRepository->getAdapter()->getConnection()->log);
     }
 
 
@@ -99,23 +115,21 @@ class MigrateUpDownTest extends \PHPUnit_Framework_TestCase
      */
     public function testDownCommand()
     {
-        $migrator = new MigrationService(new FileRepository(__DIR__ . '/../fixtures'), $this->repository);
-        $migrator->setLogger($logger = new TestLogger);
-
         $m = new Migration(2, 'migration2.sql');
 
-        $this->repository->getAdapter()->getConnection()->returnValue = [
-            ['down'=>'M2: DOWN', 'in_transaction'=>1],
+        $this->dbRepository->getAdapter()->getConnection()->returnValue = [
+            ['data'=>$this->_getMigrationData('migration2.sql')],
         ];
-        $migrator->down($m);
-        $this->assertEquals(["M2: DOWN\n"], $logger->getLog());
+        $this->service->down($m);
+        $this->assertEquals(["M2: DOWN-1\n", "M2: DOWN-2\n"], $this->logger->getLog());
 
         $this->assertEquals([
             'BEGIN',
-            'M2: DOWN',
+            'M2: DOWN-1',
+            'M2: DOWN-2',
             "DELETE FROM table_name WHERE id='2'",
             'COMMIT',
-        ], $this->repository->getAdapter()->getConnection()->log);
+        ], $this->dbRepository->getAdapter()->getConnection()->log);
     }
 
 
@@ -124,21 +138,18 @@ class MigrateUpDownTest extends \PHPUnit_Framework_TestCase
      */
     public function testDownNoTransaction()
     {
-        $migrator = new MigrationService(new FileRepository(__DIR__ . '/../fixtures'), $this->repository);
-        $migrator->setLogger($logger = new TestLogger);
-
         $m = new Migration(2, 'migration-no-trans.sql');
         $m->isTransaction(false);
 
-        $this->repository->getAdapter()->getConnection()->returnValue = [
-            ['down'=>'M3: DOWN', 'in_transaction'=>0],
+        $this->dbRepository->getAdapter()->getConnection()->returnValue = [
+            ['data'=>$this->_getMigrationData('migration-no-trans.sql')],
         ];
-        $migrator->down($m);
-        $this->assertEquals(['NO TRANSACTION!', "M3: DOWN\n"], $logger->getLog());
+        $this->service->down($m);
+        $this->assertEquals(['NO TRANSACTION!', "M3: DOWN\n"], $this->logger->getLog());
 
         $this->assertEquals([
             'M3: DOWN',
             "DELETE FROM table_name WHERE id='2'",
-        ], $this->repository->getAdapter()->getConnection()->log);
+        ], $this->dbRepository->getAdapter()->getConnection()->log);
     }
 }

@@ -31,7 +31,7 @@ class Migration
      */
     public function __construct($id, $name, $date = null)
     {
-        $this->id = $id;
+        $this->id   = $id;
         $this->name = $name;
         $this->date = new \DateTime($date);
     }
@@ -154,6 +154,8 @@ class Migration
     }
 
     /**
+     * Миграция требует удаления
+     *
      * @param null $newValue
      * @return bool
      */
@@ -183,11 +185,11 @@ class Migration
     /**
      * UP
      *
-     * @param string $up - SQL разделенный ";"
+     * @param string $up - SQL с разделитеями
      */
     public function setUp($up)
     {
-        $this->up = $this->_parse_sql($up);
+        $this->up = $this->_parseSql($up);
     }
 
     /**
@@ -206,7 +208,7 @@ class Migration
      */
     public function setDown($down)
     {
-        $this->down = $this->_parse_sql($down);
+        $this->down = $this->_parseSql($down);
     }
 
     /**
@@ -224,7 +226,7 @@ class Migration
      * @param  string $sql - SQL разделенный ";"
      * @return array - Массив SQL-запросов
      */
-    private function _parse_sql($sql)
+    private function _parseSql($sql)
     {
         return array_values(array_filter(array_map(function ($value) { return trim(rtrim($value, $this->separator)); },
             preg_split(sprintf("/%s[\s]*\n/", preg_quote($this->separator)), rtrim(trim($sql), $this->separator)))));
