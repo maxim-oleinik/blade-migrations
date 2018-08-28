@@ -10,18 +10,12 @@
   }],
   "require": {
     "php": "7.*",
-    "blade/database": "^0.2.0@dev",
-    "symfony/finder": "^3.4.0",
+    "blade/database": "^0.2.1",
+    "symfony/finder": "2.8.*|3.*",
     "psr/log": "~1.0"
   },
   "require-dev": {
     "phpunit/phpunit": "5.*"
-  },
-  "repositories": {
-    "blade/database": {
-      "type": "git",
-      "url": "https://github.com/maxim-oleinik/blade-database.git"
-    }
   },
   "autoload": {
     "psr-4": {
