@@ -15,7 +15,7 @@ class TestDbConnection implements DbConnectionInterface
         return (string)$value;
     }
 
-    public function execute($sql, $bindings = []): int
+    public function execute($sql, array $bindings = []): int
     {
         $this->log[] = $sql;
         if ($this->throwExceptionOnCallNum && $this->throwExceptionOnCallNum == count($this->log)) {
@@ -24,7 +24,7 @@ class TestDbConnection implements DbConnectionInterface
         return 1;
     }
 
-    public function each($sql, $bindings = [], callable $callback)
+    public function each($sql, callable $callback, array $bindings = [])
     {
         if ($this->returnValue) {
             foreach ($this->returnValue as $row) {
