@@ -2,8 +2,8 @@
 
 # Сборка проекта (Default)
 build: vendor/composer/installed.json
-	composer validate --no-check-all --strict
 	composer dump
+	composer validate --no-check-all --strict
 
 vendor/composer/installed.json: composer.json
 	composer update
