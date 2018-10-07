@@ -46,7 +46,7 @@ ALTER TABLE posts   DROP COLUMN slug;
 
 1. Добавить в **composer**
     ```
-        composer require blade/migrations
+        composer require maxim-oleinik/blade-migrations
     ```
 
 2. Подключить к своей БД - необходимо реализовать интерфейс `\Blade\Database\DbConnectionInterface`  

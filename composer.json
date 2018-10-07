@@ -1,7 +1,7 @@
 {
-  "name": "blade/migrations",
+  "name": "maxim-oleinik/blade-migrations",
   "type": "library",
-  "description": "Raw SQL migration tool for PHP apps",
+  "description": "Raw SQL database migration tool for PHP apps",
   "keywords": ["migrations", "database", "db", "database migrations"],
   "license": "MIT",
   "authors": [{
@@ -11,7 +11,7 @@
 
   "require": {
     "php": "7.*",
-    "blade/database": "^0.2.1",
+    "maxim-oleinik/blade-database": "^0.2.2",
     "psr/log": "~1.0",
     "symfony/finder": "2.*|3.*|4.*"
   },
