@@ -3,6 +3,7 @@ Blade/Migrations
 [![Latest Stable Version](https://poser.pugx.org/maxim-oleinik/blade-migrations/v/stable)](https://packagist.org/packages/maxim-oleinik/blade-migrations)
 
 Библиотека предоставляет API для реализации консольных команд для управления миграциями БД.
+* Symfony/Console - https://github.com/maxim-oleinik/blade-migrations-symfony
 * Laravel/Artisan - https://github.com/maxim-oleinik/blade-migrations-laravel
 
 **Особенности:**
