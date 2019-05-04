@@ -107,9 +107,10 @@ class MigrationService implements \Psr\Log\LoggerAwareInterface
      * UP
      *
      * @param Migration $migration
+     * @param bool      $testRollback
      * @throws \Exception
      */
-    public function up(Migration $migration)
+    public function up(Migration $migration, $testRollback = false)
     {
         if (!$migration->isNew()) {
             throw new \InvalidArgumentException(__METHOD__.": Expected NEW migration");
@@ -118,8 +119,20 @@ class MigrationService implements \Psr\Log\LoggerAwareInterface
         // Загрузить SQL
         $this->fileRepository->loadSql($migration);
 
-        $func = function () use ($migration) {
-            $this->_processMigrationSql($migration->getUp());
+        $func = function () use ($migration, $testRollback) {
+            $upList = $migration->getUp();
+            $this->_processMigrationSql($upList);
+            if ($testRollback) {
+                if ($this->logger) {
+                    $this->logger->info('<comment>Rollback</comment>');
+                    $this->logger->info('<comment>----------------------------------</comment>');
+                }
+                $this->_processMigrationSql($migration->getDown());
+                if ($this->logger) {
+                    $this->logger->info('<comment>----------------------------------</comment>');
+                }
+                $this->_processMigrationSql($upList);
+            }
             $this->getDbRepository()->insert($migration);
         };
 
@@ -141,12 +154,10 @@ class MigrationService implements \Psr\Log\LoggerAwareInterface
             $this->dbRepository->loadSql($migration);
         }
 
-        $func = function () use ($migration) {
+        $this->_processMigration($migration, function () use ($migration) {
             $this->_processMigrationSql($migration->getDown());
             $this->dbRepository->delete($migration);
-        };
-
-        $this->_processMigration($migration, $func);
+        });
     }
 
 

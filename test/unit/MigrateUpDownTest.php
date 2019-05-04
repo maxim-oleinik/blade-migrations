@@ -68,6 +68,37 @@ class MigrateUpDownTest extends \PHPUnit_Framework_TestCase
         ], $this->dbRepository->getAdapter()->getConnection()->log);
     }
 
+    /**
+     * UP with ROLLBACK command
+     */
+    public function testUpWithRollbackCommand()
+    {
+        $this->service->up(new Migration(null, 'migration2.sql'), true);
+        $this->assertEquals([
+            "M2: UP-1\n",
+            "M2: UP-2\n",
+            "<comment>Rollback</comment>",
+            "<comment>----------------------------------</comment>",
+            "M2: DOWN-1\n",
+            "M2: DOWN-2\n",
+            "<comment>----------------------------------</comment>",
+            "M2: UP-1\n",
+            "M2: UP-2\n",
+        ], $this->logger->getLog());
+
+        $this->assertEquals([
+            'BEGIN',
+            'M2: UP-1',
+            'M2: UP-2',
+            "M2: DOWN-1",
+            "M2: DOWN-2",
+            'M2: UP-1',
+            'M2: UP-2',
+            "INSERT INTO table_name (name, data) VALUES ('migration2.sql', '".$this->_getMigrationData('migration2.sql')."')",
+            'COMMIT',
+        ], $this->dbRepository->getAdapter()->getConnection()->log);
+    }
+
 
     /**
      * UP без транзакции

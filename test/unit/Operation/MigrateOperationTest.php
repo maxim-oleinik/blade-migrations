@@ -102,6 +102,32 @@ class MigrateOperationTest extends \PHPUnit_Framework_TestCase
 
 
     /**
+     * UP-DOWN-UP - автотест миграции
+     */
+    public function testUpDownUp()
+    {
+        $this->service->expects($this->once())
+            ->method('getDiff')
+            ->willReturn([
+                $m1 = new Migration(null, 'M1'),
+            ]);
+
+        $this->service->expects($this->once())
+            ->method('up')
+            ->with($m1);
+
+        $this->cmd->setTestRollback(true);
+        $this->cmd->run();
+
+        $this->assertSame([
+            '<info>M1</info>',
+            '<error>WITH Rollback</error>',
+            'Done'
+        ], $this->logger->getLog());
+    }
+
+
+    /**
      * есть 2 миграции вверх - Вторая указана явно
      */
     public function testTwoMigrationsUpRunSecondOnDemand()
@@ -218,6 +244,33 @@ class MigrateOperationTest extends \PHPUnit_Framework_TestCase
         $this->cmd->run();
 
         $this->assertSame(['<info>M1</info>', '<error>Rollback: M2</error>', 'Done'], $this->logger->getLog());
+    }
+
+
+    /**
+     * Auto: игнорировать проверку ролбека, если указано --auto
+     */
+    public function testAutoIgnoreTestRollback()
+    {
+        $m1 = new Migration(null, 'M1');
+
+        $this->service->expects($this->once())
+            ->method('getDiff')
+            ->willReturn([$m1]);
+
+        $this->service->expects($this->once())
+            ->method('up')
+            ->with($m1);
+
+        $this->service->expects($this->never())
+            ->method('down');
+
+        // Все миграции
+        $this->cmd->setAuto(true);
+        $this->cmd->setTestRollback(true);
+        $this->cmd->run();
+
+        $this->assertSame(['<error>Ignore "Test Rollback" option with "Auto" option</error>', '<info>M1</info>', 'Done'], $this->logger->getLog());
     }
 
 

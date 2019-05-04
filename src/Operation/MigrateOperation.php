@@ -30,6 +30,11 @@ class MigrateOperation extends BaseOperation
     private $optForce = false;
 
     /**
+     * @var bool
+     */
+    private $optTestRollback = false;
+
+    /**
      * Конструктор
      *
      * @param  MigrationService $service
@@ -40,19 +45,27 @@ class MigrateOperation extends BaseOperation
     }
 
     /**
-     * @param bool $auto
+     * @param bool $flag
      */
-    public function setAuto($auto)
+    public function setAuto(bool $flag)
     {
-        $this->optAuto = (bool)$auto;
+        $this->optAuto = $flag;
     }
 
     /**
-     * @param bool $force
+     * @param bool $flag
      */
-    public function setForce($force)
+    public function setForce(bool $flag)
     {
-        $this->optForce = (bool)$force;
+        $this->optForce = $flag;
+    }
+
+    /**
+     * @param bool $flag
+     */
+    public function setTestRollback(bool $flag)
+    {
+        $this->optTestRollback = $flag;
     }
 
 
@@ -97,6 +110,10 @@ class MigrateOperation extends BaseOperation
             return;
         }
 
+        if ($this->optAuto && $this->optTestRollback) {
+            $this->alert('<error>Ignore "Test Rollback" option with "Auto" option</error>');
+        }
+
         foreach ($migrations as $next) {
 
             $title = $next->getName();
@@ -109,9 +126,12 @@ class MigrateOperation extends BaseOperation
                 // Добавление
                 if ($next->isNew()) {
                     $this->info("<info>{$title}</info>");
+                    if ($this->_isTestRollback()) {
+                        $this->info('<error>WITH Rollback</error>');
+                    }
                 // Удаление
                 } else {
-                    $this->error("<error>{$title}</error>");
+                    $this->info("<error>{$title}</error>");
                 }
 
             // Если без --force, то спрашиваем подтверждение на каждую миграцию
@@ -120,7 +140,7 @@ class MigrateOperation extends BaseOperation
             }
 
             if ($next->isNew() && !$next->isRemove()) {
-                $this->service->up($next);
+                $this->service->up($next, $this->_isTestRollback());
 
             } elseif (!$next->isNew() && $next->isRemove()) {
                 $this->service->down($next);
@@ -132,5 +152,13 @@ class MigrateOperation extends BaseOperation
         }
 
         $this->info('Done');
+    }
+
+    /**
+     * @return bool
+     */
+    private function _isTestRollback(): bool
+    {
+        return $this->optTestRollback && !$this->optAuto;
     }
 }

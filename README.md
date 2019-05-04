@@ -100,6 +100,7 @@ ALTER TABLE posts   DROP COLUMN slug;
     
     $op->setAuto(bool); // Автооткат отсутствющих в текущей ветке миграций (есть в базе, но нет на диске)
     $op->setForce(bool); // Спрашивать подтверждение
+    $op->setTestRollback(bool); // Протестирововать откат миграции в режиме UP-DOWN-UP
 
     /**
      * @param $confirmationCallback - функция, которая спросит подтверждение у пользователя и вернет true/false
