@@ -43,9 +43,10 @@ class MigrateOperationTest extends \PHPUnit_Framework_TestCase
      */
     public function testNoMigrations()
     {
-        $this->service->expects($this->once())
+        $this->service
+            ->expects($this->once())
             ->method('getDiff')
-            ->will($this->returnValue([]));
+            ->willReturn([]);
 
         $this->cmd->run();
 
@@ -54,22 +55,45 @@ class MigrateOperationTest extends \PHPUnit_Framework_TestCase
 
 
     /**
-     * 2 миграции вверх - выполняем только первую
+     * Пользователь отказался
+     */
+    public function testCallbackReject()
+    {
+        $this->service->expects($this->once())
+            ->method('getDiff')
+            ->willReturn([
+                $m1 = new Migration(null, 'M1'),
+            ]);
+
+        $this->service->expects($this->never())
+            ->method('up');
+
+        $this->cmd->run(static function () {
+            // Отказ
+            return false;
+        });
+
+        $this->assertSame([], $this->logger->getLog());
+    }
+
+
+    /**
+     * есть 2 миграции вверх - выполняем только первую
      */
     public function testTwoMigrationsUpRunFirstOnly()
     {
         $this->service->expects($this->once())
             ->method('getDiff')
-            ->will($this->returnValue([
+            ->willReturn([
                 $m1 = new Migration(null, 'M1'),
                 new Migration(null, 'M2'),
-            ]));
+            ]);
 
         $this->service->expects($this->once())
             ->method('up')
             ->with($m1);
 
-        $this->cmd->run(function () {
+        $this->cmd->run(static function () {
             return true;
         });
 
@@ -78,16 +102,16 @@ class MigrateOperationTest extends \PHPUnit_Framework_TestCase
 
 
     /**
-     * 2 миграции вверх - выполняем Вторую по требованию
+     * есть 2 миграции вверх - Вторая указана явно
      */
     public function testTwoMigrationsUpRunSecondOnDemand()
     {
         $this->service->expects($this->once())
             ->method('getDiff')
-            ->will($this->returnValue([
+            ->willReturn([
                 $m1 = new Migration(null, 'M1'),
                 $m2 = new Migration(null, 'M2'),
-            ]));
+            ]);
 
         $this->service->expects($this->once())
             ->method('up')
@@ -100,14 +124,13 @@ class MigrateOperationTest extends \PHPUnit_Framework_TestCase
 
 
     /**
-     * Выбранная миграция не найдена
+     * Явно указанная миграция не найдена
      */
     public function testUpSelectedMigrationNotFound()
     {
         $this->service->expects($this->once())
             ->method('getDiff')
-            ->will($this->returnValue([
-            ]));
+            ->willReturn([]);
 
         $this->service->expects($this->never())->method('up');
 
@@ -118,19 +141,19 @@ class MigrateOperationTest extends \PHPUnit_Framework_TestCase
 
 
     /**
-     * 2 миграции вверх - выполняем обе
+     * Autho: есть 2 миграции вверх - выполняем обе
      */
-    public function testTwoMigrationsUpRunAll()
+    public function testAutoTwoMigrationsUpRunAll()
     {
         // Все миграции
         $this->cmd->setAuto(true);
 
         $this->service->expects($this->once())
             ->method('getDiff')
-            ->will($this->returnValue([
+            ->willReturn([
                 $m1 = new Migration(null, 'M1'),
                 $m2 = new Migration(null, 'M2'),
-            ]));
+            ]);
 
         $this->service->expects($this->exactly(2))
             ->method('up')
@@ -143,32 +166,9 @@ class MigrateOperationTest extends \PHPUnit_Framework_TestCase
 
 
     /**
-     * Пользователь отказался
+     * Auto: Автооткат отдной миграции
      */
-    public function testCallbackReject()
-    {
-        $this->service->expects($this->once())
-            ->method('getDiff')
-            ->will($this->returnValue([
-                $m1 = new Migration(null, 'M1'),
-            ]));
-
-        $this->service->expects($this->never())
-            ->method('up');
-
-        $this->cmd->run(function () {
-            // Отказ
-            return false;
-        });
-
-        $this->assertSame([], $this->logger->getLog());
-    }
-
-
-    /**
-     * Откат отдной миграции
-     */
-    public function testRollbackOne()
+    public function testAutoRollbackOne()
     {
         // Все миграции
         $this->cmd->setAuto(true);
@@ -179,7 +179,7 @@ class MigrateOperationTest extends \PHPUnit_Framework_TestCase
 
         $this->service->expects($this->once())
             ->method('getDiff')
-            ->will($this->returnValue([$m1]));
+            ->willReturn([$m1]);
 
         $this->service->expects($this->once())
             ->method('down')
@@ -195,9 +195,9 @@ class MigrateOperationTest extends \PHPUnit_Framework_TestCase
 
 
     /**
-     * Добавить одну, удалить вторую
+     * Auto: Добавить одну, удалить вторую
      */
-    public function testAddFirstRollbackSecond()
+    public function testAutoAddFirstRollbackSecond()
     {
         // Все миграции
         $this->cmd->setAuto(true);
@@ -208,7 +208,7 @@ class MigrateOperationTest extends \PHPUnit_Framework_TestCase
 
         $this->service->expects($this->once())
             ->method('getDiff')
-            ->will($this->returnValue([$m1, $m2]));
+            ->willReturn([$m1, $m2]);
 
         $this->service->expects($this->once())
             ->method('up')
@@ -239,7 +239,7 @@ class MigrateOperationTest extends \PHPUnit_Framework_TestCase
 
         $this->service->expects($this->once())
             ->method('getDiff')
-            ->will($this->returnValue([$m2, $m1]));
+            ->willReturn([$m2, $m1]);
 
         $this->cmd->run(function () {
             $this->fail('Expected no call');
@@ -261,7 +261,7 @@ class MigrateOperationTest extends \PHPUnit_Framework_TestCase
 
         $this->service->expects($this->once())
             ->method('getDiff')
-            ->will($this->returnValue([$m1]));
+            ->willReturn([$m1]);
 
         $this->service->expects($this->once())
             ->method('up')
