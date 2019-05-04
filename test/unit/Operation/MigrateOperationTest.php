@@ -119,7 +119,7 @@ class MigrateOperationTest extends \PHPUnit_Framework_TestCase
 
         $this->cmd->run(null, $m2->getName());
 
-        $this->assertSame(['Done'], $this->logger->getLog());
+        $this->assertSame(['<info>M2</info>', 'Done'], $this->logger->getLog());
     }
 
 
@@ -145,9 +145,6 @@ class MigrateOperationTest extends \PHPUnit_Framework_TestCase
      */
     public function testAutoTwoMigrationsUpRunAll()
     {
-        // Все миграции
-        $this->cmd->setAuto(true);
-
         $this->service->expects($this->once())
             ->method('getDiff')
             ->willReturn([
@@ -159,9 +156,11 @@ class MigrateOperationTest extends \PHPUnit_Framework_TestCase
             ->method('up')
             ->withConsecutive($m1, $m2);
 
+        // Все миграции
+        $this->cmd->setAuto(true);
         $this->cmd->run();
 
-        $this->assertSame(['Done'], $this->logger->getLog());
+        $this->assertSame(['<info>M1</info>','<info>M2</info>','Done'], $this->logger->getLog());
     }
 
 
@@ -170,9 +169,6 @@ class MigrateOperationTest extends \PHPUnit_Framework_TestCase
      */
     public function testAutoRollbackOne()
     {
-        // Все миграции
-        $this->cmd->setAuto(true);
-
         $m1 = new Migration(1, 'M1');
         // Миграция на удаление
         $m1->isRemove(true);
@@ -188,9 +184,11 @@ class MigrateOperationTest extends \PHPUnit_Framework_TestCase
         $this->service->expects($this->never())
             ->method('up');
 
+        // Все миграции
+        $this->cmd->setAuto(true);
         $this->cmd->run();
 
-        $this->assertSame(['Done'], $this->logger->getLog());
+        $this->assertSame(['<error>Rollback: M1</error>', 'Done'], $this->logger->getLog());
     }
 
 
@@ -199,9 +197,6 @@ class MigrateOperationTest extends \PHPUnit_Framework_TestCase
      */
     public function testAutoAddFirstRollbackSecond()
     {
-        // Все миграции
-        $this->cmd->setAuto(true);
-
         $m1 = new Migration(null, 'M1');
         $m2 = new Migration(2, 'M2');
         $m2->isRemove(true);
@@ -218,9 +213,11 @@ class MigrateOperationTest extends \PHPUnit_Framework_TestCase
             ->method('down')
             ->with($m2);
 
+        // Все миграции
+        $this->cmd->setAuto(true);
         $this->cmd->run();
 
-        $this->assertSame(['Done'], $this->logger->getLog());
+        $this->assertSame(['<info>M1</info>', '<error>Rollback: M2</error>', 'Done'], $this->logger->getLog());
     }
 
 

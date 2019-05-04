@@ -94,7 +94,7 @@ class MigrationService implements \Psr\Log\LoggerAwareInterface
         foreach ($this->status() as $migration) {
             if ($migration->isNew()) {
                 $up[] = $migration;
-            } else if (!$onlyNew && $migration->isRemove()) {
+            } elseif (!$onlyNew && $migration->isRemove()) {
                 $down[] = $migration;
             }
         }

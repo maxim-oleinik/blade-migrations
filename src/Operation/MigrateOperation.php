@@ -62,7 +62,7 @@ class MigrateOperation extends BaseOperation
      * @param callable|null $confirmationCallback - Спросить подтверждение у пользователя перед запуском каждой миграции
      *                                            функция должна вернуть true/false
      *                                            принимает $migrationTitle
-     * @param string        $migrationName - Название миграции которую надо явно запустить
+     * @param string        $migrationName        - Название миграции которую надо явно запустить
      */
     public function run(callable $confirmationCallback = null, $migrationName = null)
     {
@@ -77,7 +77,7 @@ class MigrateOperation extends BaseOperation
             }
             $migrations = [];
             foreach ($this->service->getDiff(true) as $migration) {
-                if ($migration->getName() == $migrationName) {
+                if ($migration->getName() === $migrationName) {
                     $migrations[] = $migration;
                 }
             }
@@ -104,7 +104,8 @@ class MigrateOperation extends BaseOperation
                 $title = 'Rollback: ' . $title;
             }
 
-            if ($this->optForce) {
+            // Показать заголовок Мигации
+            if ($this->optForce || !$confirmationCallback) {
                 // Добавление
                 if ($next->isNew()) {
                     $this->info("<info>{$title}</info>");
@@ -114,7 +115,7 @@ class MigrateOperation extends BaseOperation
                 }
 
             // Если без --force, то спрашиваем подтверждение на каждую миграцию
-            } else if ($confirmationCallback && !$confirmationCallback($title)) {
+            } elseif (!$confirmationCallback($title)) {
                 return;
             }
 
