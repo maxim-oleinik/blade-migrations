@@ -33,7 +33,9 @@ class Migration
     {
         $this->id   = $id;
         $this->name = $name;
-        $this->date = new \DateTime($date);
+        if ($date) {
+            $this->date = new \DateTime($date);
+        }
     }
 
 
@@ -130,7 +132,7 @@ class Migration
     }
 
     /**
-     * @return \DateTime
+     * @return null|\DateTime
      */
     public function getDate()
     {
