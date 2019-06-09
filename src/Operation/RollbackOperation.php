@@ -50,6 +50,8 @@ class RollbackOperation extends BaseOperation
      *                                            принимает $migrationTitle
      * @param int           $migrationId          - ID конкретной миграции, которую надо накатить
      * @param bool          $loadFromFile         - Загрузить текст миграции из файла вместо БД
+     *
+     * @return null|\Blade\Migrations\Migration - Если успешно, возвращает Миграцию
      */
     public function run(callable $confirmationCallback = null, $migrationId = null, $loadFromFile = false)
     {
@@ -84,5 +86,6 @@ class RollbackOperation extends BaseOperation
 
         $this->service->down($next, $loadFromFile);
         $this->info('Done');
+        return $next;
     }
 }
