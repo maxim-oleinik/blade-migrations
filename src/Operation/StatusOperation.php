@@ -36,22 +36,22 @@ class StatusOperation
         $data = [];
         $newMigrations = [];
         foreach ($migrations as $migration) {
-            $name = $migration->getName();
             if ($migration->isNew()) {
-                $status = '<comment>A</comment>';
-                $name = "<comment>{$name}</comment>";
-            } else if ($migration->isRemove()) {
-                $status = '<fg=red>D</fg=red>';
-                $name = "<fg=red>{$name}</fg=red>";
+                $tpl = '<info>%s</info>';
+                $status = 'A';
+            } elseif ($migration->isRemove()) {
+                $tpl = '<fg=red>%s</fg=red>';
+                $status = 'D';
             } else {
-                $status = '<info>Y</info>';
+                $tpl = '%s';
+                $status = '<comment>Y</comment>';
             }
 
             $row = [
-                $status,
-                $migration->getId(),
-                $migration->isNew() ? '' : $migration->getDate()->format('d.m.Y H:i:s'),
-                $name
+                sprintf($tpl, $status),
+                $migration->getId() ? sprintf($tpl, $migration->getId())  : '',
+                $migration->isNew() ? '' : sprintf($tpl, $migration->getDate()->format('d.m.Y H:i:s')),
+                sprintf($tpl, $migration->getName()),
             ];
 
             if ($migration->isNew()) {
