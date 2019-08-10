@@ -23,7 +23,7 @@ class Migration
 
 
     /**
-     * Конструктор
+     * Constructor
      *
      * @param int    $id
      * @param string $name
@@ -55,10 +55,9 @@ class Migration
         $posUp   = null;
         $posDown = null;
 
-        foreach ($matches[1] as $i => $data) {
-            list($tag, $position) = $data;
-            $tag = trim($tag);
+        foreach ($matches[1] as $i => list($tag, $position)) {
 
+            $tag = trim($tag);
             switch ($tag) {
                 case self::TAG_UP:
                     if (null !== $posUp) {
@@ -69,8 +68,9 @@ class Migration
 
                 case self::TAG_DOWN:
                     if (null === $posUp) {
-                        throw new \InvalidArgumentException(__METHOD__. ": Expected UP tag first");
-                    } elseif (null !== $posDown) {
+                        throw new \InvalidArgumentException(__METHOD__. ': Expected UP tag first');
+                    }
+                    if (null !== $posDown) {
                         throw new \InvalidArgumentException(__METHOD__. ": Expected single {$tag} tag");
                     }
                     $posDown = $position + strlen($tag);
@@ -80,23 +80,24 @@ class Migration
 
                 case self::TAG_TRANSACTION:
                     if (null !== $posUp) {
-                        throw new \InvalidArgumentException(__METHOD__. ": Expected TRANSACTION tag before UP tag");
+                        throw new \InvalidArgumentException(__METHOD__. ': Expected TRANSACTION tag before UP tag');
                     }
                     $this->isTransaction = true;
                     break;
 
                 case self::TAG_SEPARATOR:
                     if (null !== $posUp) {
-                        throw new \InvalidArgumentException(__METHOD__. ": Expected SEPARATOR tag before UP tag");
+                        throw new \InvalidArgumentException(__METHOD__. ': Expected SEPARATOR tag before UP tag');
                     }
                     $separator = null;
                     if (isset($matches[2][$i][0])) {
                         $separator = substr(trim($matches[2][$i][0]), 1);
                     }
                     if (!$separator) {
-                        throw new \InvalidArgumentException(__METHOD__. ": Expected SEPARATOR tag has value");
-                    } elseif (strlen($separator) > 1) {
-                        throw new \InvalidArgumentException(__METHOD__. ": Expected SEPARATOR tag has SINGLE CHAR value");
+                        throw new \InvalidArgumentException(__METHOD__. ': Expected SEPARATOR tag has value');
+                    }
+                    if (strlen($separator) > 1) {
+                        throw new \InvalidArgumentException(__METHOD__. ': Expected SEPARATOR tag has SINGLE CHAR value');
                     }
                     $this->separator = $separator;
                     break;
@@ -104,10 +105,10 @@ class Migration
         }
 
         if (null === $posUp) {
-            throw new \InvalidArgumentException(__METHOD__. ": UP tag not found");
+            throw new \InvalidArgumentException(__METHOD__. ': UP tag not found');
         }
         if (null === $posDown) {
-            throw new \InvalidArgumentException(__METHOD__. ": DOWN tag not found");
+            throw new \InvalidArgumentException(__METHOD__. ': DOWN tag not found');
         }
 
         $this->setUp($up);
@@ -150,7 +151,7 @@ class Migration
     /**
      * @return bool
      */
-    public function isNew()
+    public function isNew(): bool
     {
         return !(bool)$this->getId();
     }
@@ -161,7 +162,7 @@ class Migration
      * @param null $newValue
      * @return bool
      */
-    public function isRemove($newValue = null)
+    public function isRemove($newValue = null): bool
     {
         if (null !== $newValue) {
             $this->isRemove = (bool) $newValue;
@@ -175,7 +176,7 @@ class Migration
      * @param bool $newValue
      * @return bool
      */
-    public function isTransaction($newValue = null)
+    public function isTransaction($newValue = null): bool
     {
         if (null !== $newValue) {
             $this->isTransaction = (bool) $newValue;

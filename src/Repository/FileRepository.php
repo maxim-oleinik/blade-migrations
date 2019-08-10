@@ -14,7 +14,7 @@ class FileRepository
 
 
     /**
-     * Конструктор
+     * Constructor
      *
      * @param string $migrationsDir
      */
@@ -29,7 +29,7 @@ class FileRepository
      *
      * @return array - FILE => PATH
      */
-    public function all()
+    public function all(): array
     {
         $finder = new \Symfony\Component\Finder\Finder;
         $finder->files()->in($this->dir)->sortByName();
@@ -80,10 +80,9 @@ class FileRepository
     private function _getFileName(Migration $migration): string
     {
         if (!$migration->getName()) {
-            throw new \InvalidArgumentException(__METHOD__ . ": Expected Migration has Name");
+            throw new \InvalidArgumentException(__METHOD__ . ': Expected Migration has Name');
         }
 
-        $fileName = $this->dir . DIRECTORY_SEPARATOR . $migration->getName();
-        return $fileName;
+        return $this->dir . DIRECTORY_SEPARATOR . $migration->getName();
     }
 }

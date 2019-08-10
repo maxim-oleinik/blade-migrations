@@ -12,7 +12,7 @@ class StatusOperation
     protected $migrator;
 
     /**
-     * Конструктор
+     * Constructor
      *
      * @param  MigrationService $migrator
      */
@@ -24,8 +24,10 @@ class StatusOperation
 
     /**
      * Run
+     *
+     * @return array
      */
-    public function getData()
+    public function getData(): array
     {
         $migrations = $this->migrator->status();
 

@@ -11,7 +11,7 @@ class MakeOperation
     protected $repository;
 
     /**
-     * Конструктор
+     * Constructor
      *
      * @param FileRepository $repository
      */
@@ -25,7 +25,7 @@ class MakeOperation
      * Run
      *
      * @param  string $name
-     * @return string - Название файла Миграции
+     * @return string - Migration file name
      */
     public function run($name)
     {
@@ -34,7 +34,8 @@ class MakeOperation
             trim($name)
         );
         $migration = new Migration(null, $fileName);
-        $migration->setSql(Migration::TAG_TRANSACTION . PHP_EOL
+        $migration->setSql(
+            Migration::TAG_TRANSACTION . PHP_EOL
             . Migration::TAG_UP . PHP_EOL
             . PHP_EOL
             . Migration::TAG_DOWN . PHP_EOL

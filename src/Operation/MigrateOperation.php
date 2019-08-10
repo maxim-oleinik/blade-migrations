@@ -3,9 +3,9 @@
 use Blade\Migrations\MigrationService;
 
 /**
- * Выполнить миграцию
+ * Apply migration
  *
- * Конфигурация
+ * Config
  *   - setAuto(bool)  - Выполнить ВЕСЬ набор доступных Миграций (включая Откаты)
  *   - setForce(bool) - Не спрашивать подтверждение
  *   - run(callable $confirmationCallback = null) - см. описание метода
@@ -35,7 +35,7 @@ class MigrateOperation extends BaseOperation
     private $optTestRollback = false;
 
     /**
-     * Конструктор
+     * Constructor
      *
      * @param  MigrationService $service
      */

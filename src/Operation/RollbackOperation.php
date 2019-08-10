@@ -3,9 +3,9 @@
 use Blade\Migrations\MigrationService;
 
 /**
- * Откатить миграцию
+ * Rollback Migration
  *
- * Конфигурация
+ * Config
  *   - setForce(bool) - Не спрашивать подтверждение
  *   - run(callable $confirmationCallback, $migrationId, $loadFromFile) - см. описание метода
  *
@@ -24,7 +24,7 @@ class RollbackOperation extends BaseOperation
     private $optForce = false;
 
     /**
-     * Конструктор
+     * Constructor
      *
      * @param  MigrationService $service
      */

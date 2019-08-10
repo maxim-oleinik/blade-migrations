@@ -27,7 +27,7 @@ class MigrationService implements \Psr\Log\LoggerAwareInterface
 
 
     /**
-     * Конструктор
+     * Constructor
      *
      * @param FileRepository $fileRepository
      * @param DbRepository   $dbRepository
@@ -42,7 +42,7 @@ class MigrationService implements \Psr\Log\LoggerAwareInterface
     /**
      * @return DbRepository
      */
-    public function getDbRepository()
+    public function getDbRepository(): DbRepository
     {
         return $this->dbRepository;
     }
@@ -113,7 +113,7 @@ class MigrationService implements \Psr\Log\LoggerAwareInterface
     public function up(Migration $migration, $testRollback = false)
     {
         if (!$migration->isNew()) {
-            throw new \InvalidArgumentException(__METHOD__.": Expected NEW migration");
+            throw new \InvalidArgumentException(__METHOD__. ': Expected NEW migration');
         }
 
         // Загрузить SQL

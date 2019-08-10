@@ -20,7 +20,7 @@ class DbRepository
 
 
     /**
-     * Конструктор
+     * Constructor
      *
      * @param string    $tableName
      * @param DbAdapter $db
@@ -115,14 +115,13 @@ class DbRepository
 
 
     /**
-     * @param $row
-     * @return \Blade\Migrations\Migration
+     * @param  array $row
+     * @return Migration
      */
-    private function _makeModel($row)
+    private function _makeModel($row): Migration
     {
         $row = array_values((array)$row);
-        $m = new Migration($row[0], $row[1], $row[2]);
-        return $m;
+        return new Migration($row[0], $row[1], $row[2]);
     }
 
 
@@ -149,7 +148,7 @@ class DbRepository
     public function delete(Migration $migration)
     {
         if ($migration->isNew()) {
-            throw new \InvalidArgumentException(__METHOD__.": Expected NOT NEW migration");
+            throw new \InvalidArgumentException(__METHOD__. ': Expected NOT NEW migration');
         }
         $this->adapter->execute(sprintf("DELETE FROM {$this->tableName} WHERE id='%d'", $migration->getId()));
     }
