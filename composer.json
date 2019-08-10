@@ -11,7 +11,7 @@
 
   "require": {
     "php": "7.*",
-    "maxim-oleinik/blade-database": "^0.2.2",
+    "maxim-oleinik/blade-database": "^0.3.0",
     "psr/log": "~1.0",
     "symfony/finder": "2.*|3.*|4.*"
   },
