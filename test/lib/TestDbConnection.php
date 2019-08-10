@@ -24,11 +24,11 @@ class TestDbConnection implements DbConnectionInterface
         return 1;
     }
 
-    public function each($sql, callable $callback, array $bindings = [])
+    public function each($sql, array $bindings = []): \Generator
     {
         if ($this->returnValue) {
             foreach ($this->returnValue as $row) {
-                $callback($row);
+                yield $row;
             }
         }
     }
