@@ -9,7 +9,7 @@ use Blade\Migrations\Test\TestLogger;
 /**
  * @see \Blade\Migrations\Operation\RollbackOperation
  */
-class RollbackOperationTest extends \PHPUnit_Framework_TestCase
+class RollbackOperationTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @var RollbackOperation
@@ -17,12 +17,12 @@ class RollbackOperationTest extends \PHPUnit_Framework_TestCase
     private $cmd;
 
     /**
-     * @var MigrationService|\PHPUnit_Framework_MockObject_MockObject
+     * @var MigrationService|\PHPUnit\Framework\MockObject_MockObject
      */
     private $service;
 
     /**
-     * @var DbRepository|\PHPUnit_Framework_MockObject_MockObject
+     * @var DbRepository|\PHPUnit\Framework\MockObject_MockObject
      */
     private $dbRepository;
 

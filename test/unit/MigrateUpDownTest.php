@@ -12,7 +12,7 @@ use Blade\Migrations\Test\TestLogger;
 /**
  * @see \Blade\Migrations\MigrationService
  */
-class MigrateUpDownTest extends \PHPUnit_Framework_TestCase
+class MigrateUpDownTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @var DbRepository

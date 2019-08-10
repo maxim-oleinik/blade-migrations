@@ -5,7 +5,7 @@ use \Blade\Migrations\Migration;
 /**
  * @see \Blade\Migrations\Migration
  */
-class MigrationTest extends \PHPUnit_Framework_TestCase
+class MigrationTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * Ошибки разбора тегов

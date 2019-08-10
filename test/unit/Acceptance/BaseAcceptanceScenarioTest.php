@@ -12,7 +12,7 @@ use Blade\Migrations\Repository\DbRepository;
 use Blade\Migrations\Repository\FileRepository;
 use Blade\Migrations\Test\TestLogger;
 
-abstract class BaseAcceptanceScenarioTest extends \PHPUnit_Framework_TestCase
+abstract class BaseAcceptanceScenarioTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @param \Blade\Database\DbConnectionInterface $connection

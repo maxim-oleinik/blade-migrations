@@ -8,7 +8,7 @@ use Blade\Migrations\Test\TestLogger;
 /**
  * @see \Blade\Migrations\Operation\MigrateOperation
  */
-class MigrateOperationTest extends \PHPUnit_Framework_TestCase
+class MigrateOperationTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @var MigrateOperation
@@ -16,7 +16,7 @@ class MigrateOperationTest extends \PHPUnit_Framework_TestCase
     private $cmd;
 
     /**
-     * @var \PHPUnit_Framework_MockObject_MockObject
+     * @var \PHPUnit\Framework\MockObject\MockObject
      */
     private $service;
 

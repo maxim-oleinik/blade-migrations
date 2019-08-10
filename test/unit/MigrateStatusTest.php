@@ -8,7 +8,7 @@ use Blade\Migrations\Repository\FileRepository;
 /**
  * @see \Blade\Migrations\MigrationService
  */
-class MigrateStatusTest extends \PHPUnit_Framework_TestCase
+class MigrateStatusTest extends \PHPUnit\Framework\TestCase
 {
     private $repository;
 
