@@ -158,7 +158,7 @@ class MigrateUpDownTest extends \PHPUnit\Framework\TestCase
             'BEGIN',
             'M2: DOWN-1',
             'M2: DOWN-2',
-            "DELETE FROM table_name WHERE id='2'",
+            "DELETE FROM table_name\nWHERE id='2'",
             'COMMIT',
         ], $this->dbRepository->getAdapter()->getConnection()->log);
     }
@@ -180,7 +180,7 @@ class MigrateUpDownTest extends \PHPUnit\Framework\TestCase
 
         $this->assertEquals([
             'M3: DOWN',
-            "DELETE FROM table_name WHERE id='2'",
+            "DELETE FROM table_name\nWHERE id='2'",
         ], $this->dbRepository->getAdapter()->getConnection()->log);
     }
 }

@@ -35,7 +35,7 @@ class DbRepository
     /**
      * @return DbAdapter
      */
-    public function getAdapter()
+    public function getAdapter(): DbAdapter
     {
         return $this->adapter;
     }
@@ -70,8 +70,10 @@ class DbRepository
     {
         $id = (int) $id;
         if ($id) {
-            $sql = sprintf("SELECT id, name, created_at FROM {$this->tableName} WHERE id=%d LIMIT 1", $id);
-            if ($row = $this->adapter->selectRow($sql)) {
+            $query = $this->_makeQuery()
+                ->filterById($id)
+                ->limit(1);
+            if ($row = $this->adapter->selectRow($query)) {
                 return $this->_makeModel($row);
             }
         }
@@ -86,8 +88,10 @@ class DbRepository
      */
     public function findLast()
     {
-        $sql = sprintf("SELECT id, name, created_at FROM {$this->tableName} ORDER BY id DESC LIMIT 1");
-        if ($row = $this->adapter->selectRow($sql)) {
+        $query = $this->_makeQuery()
+            ->orderBy('id DESC')
+            ->limit(1);
+        if ($row = $this->adapter->selectRow($query)) {
             return $this->_makeModel($row);
         }
 
@@ -102,8 +106,10 @@ class DbRepository
      */
     public function all()
     {
-        $sql ="SELECT id, name, created_at FROM {$this->tableName} ORDER BY id DESC";
-        $data = $this->adapter->selectAll($sql);
+        $query = $this->_makeQuery()
+            ->orderBy('id DESC');
+
+        $data = $this->adapter->selectAll($query);
 
         $result = [];
         foreach ($data as $row) {
@@ -132,11 +138,11 @@ class DbRepository
      */
     public function insert(Migration $migration)
     {
-        $sql = sprintf("INSERT INTO {$this->tableName} (name, data) VALUES ('%s', '%s')",
-            $this->adapter->escape($migration->getName()),
-            $this->adapter->escape($migration->getSql())
-        );
-        $this->getAdapter()->execute($sql);
+        $query = $this->_makeQuery()->insert()->values([
+            'name' => $migration->getName(),
+            'data' => $migration->getSql(),
+        ]);
+        $this->getAdapter()->execute($query);
     }
 
 
@@ -150,7 +156,7 @@ class DbRepository
         if ($migration->isNew()) {
             throw new \InvalidArgumentException(__METHOD__. ': Expected NOT NEW migration');
         }
-        $this->adapter->execute(sprintf("DELETE FROM {$this->tableName} WHERE id='%d'", $migration->getId()));
+        $this->adapter->execute((string)$this->_makeQuery()->delete()->filterById($migration->getId()));
     }
 
 
@@ -159,11 +165,26 @@ class DbRepository
      */
     public function loadSql(Migration $migration)
     {
-        $data = $this->adapter->selectValue(sprintf("SELECT data FROM {$this->tableName} WHERE name='%s' LIMIT 1", $this->adapter->escape($migration->getName())));
+        $query = $this->_makeQuery()
+            ->select('data')
+            ->filterByName($migration->getName())
+            ->limit(1);
+
+        $data = $this->adapter->selectValue($query);
         if (!$data) {
             throw new \InvalidArgumentException(__METHOD__.": migration `{$migration->getName()}` not found in Database");
         }
 
         $migration->setSql($data);
+    }
+
+
+    /**
+     * Make Query
+     */
+    private function _makeQuery(): MigrationsQuery
+    {
+        return MigrationsQuery::make()->from($this->tableName)
+            ->select('id, name, created_at');
     }
 }
