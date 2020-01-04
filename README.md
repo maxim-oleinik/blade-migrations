@@ -1,23 +1,37 @@
 Blade/Migrations
 ================
-[![Latest Stable Version](https://poser.pugx.org/maxim-oleinik/blade-migrations/v/stable)](https://packagist.org/packages/maxim-oleinik/blade-migrations)
 
-Библиотека предоставляет API для реализации консольных команд для управления миграциями БД.
+[rus](./README.rus.md) /
+[![Latest Stable Version](https://poser.pugx.org/maxim-oleinik/blade-migrations/v/stable)](https://packagist.org/packages/maxim-oleinik/blade-migrations)
+<a href="https://packagist.org/packages/maxim-oleinik/blade-migrations"><img src="https://poser.pugx.org/maxim-oleinik/blade-migrations/d/total.svg" alt="Total Downloads"></a>
+<a href="https://packagist.org/packages/maxim-oleinik/blade-migrations"><img src="https://poser.pugx.org/maxim-oleinik/blade-migrations/license.svg" alt="License"></a>
+
+This library provides Database structure manipulation commands, see implementations:
 * Symfony/Console - https://github.com/maxim-oleinik/blade-migrations-symfony
 * Laravel/Artisan - https://github.com/maxim-oleinik/blade-migrations-laravel
 
-**Особенности:**
-* миграции на чистом SQL (на любом нативном языке БД)
-* нет своего конфига и коннекта к БД - использует существующее в проекте соединение. Можно использовать для миграций любых баз.
-* автоматический откат миграций созданных в других ветках
+
+Features
+-----------
+* **Using raw SQL queries**
+    * you can use all the capabilities of your database to describe the structure and changes
+    * easy work with procedures and functions
+    * safe data migrations (INSERT/UPDATE)
+    * IDE native syntax support
+* **Running migrations within a transaction** with automatic rollback in case of an error (if your database supports it, PostgreSQL for example)
+* **Dynamic output running the SQL-queries**
+* **Automatic rollback** after switching the branch (for reviewing, testing, demo, building at permanent/staging database)
+* **Auto-update the migration after editing** (version change in the name of the migration file)
+* **Apply with rollback testing** - `UD-DOWN-UP`
+* **Rollback or Reload any selected migration**
 
 
-Файл миграции
--------------
-**Пример файла миграций**
-* `--TRANSACTION` - миграция должна быть запущена в транзации
-* Инструкции разделяются тегами `--UP` и `--DOWN`
-* SQL запросы разделяются `";"` (последний символ в конце строки)
+Syntax
+---------
+* `--TRANSACTION` - if specified, the migration will be launched within a transaction
+* Instructions are separated by `--UP` and` --DOWN` tags.
+* The SQL queries are separated by `";"` (the last character at the end of the line)
+
 ```
 --TRANSACTION
 --UP
@@ -29,32 +43,31 @@ ALTER TABLE authors DROP COLUMN code;
 ALTER TABLE posts   DROP COLUMN slug;
 ```
 
-**Если надо сменить раделитель**, когда в SQL необходимо использовать `";"`
+**If you need to change the delimiter** (when in SQL you have to use `";"`)
 ```
---TRANSACTION
 --SEPARATOR=@
 --UP
-    ... sql@
-    ... sql@
+    ... some sql ...@
+    ... some sql ...@
 
 --DOWN
-    ... sql@
-    ... sql@
+    ... some sql ...@
+    ... some sql ...@
 ```
 
 
-Установка и настройка
+Install
 ---------
 
-1. Добавить в **composer**
+1. Composer
     ```
         composer require maxim-oleinik/blade-migrations
     ```
 
-2. Подключить к своей БД - необходимо реализовать интерфейс `\Blade\Database\DbConnectionInterface`  
-    см. https://github.com/maxim-oleinik/blade-database
+2. Implement `\Blade\Database\DbConnectionInterface` to connect with your database,
+   see https://github.com/maxim-oleinik/blade-database
 
-3. Сборка
+3. Setting up
     ```
         $conn      = new MyDbConnection; // implements \Blade\Database\DbConnectionInterface
         $dbAdapter = new \Blade\Database\DbAdapter($conn);
@@ -64,8 +77,7 @@ ALTER TABLE posts   DROP COLUMN slug;
     ```
 
 
-
-Команды
+Commands
 -------
 
 ### Status - `\Blade\Migrations\Operation\StatusOperation`
@@ -74,7 +86,7 @@ ALTER TABLE posts   DROP COLUMN slug;
     $data = $op->getData();
 ```
 
-Возвращает массив массив данных по текущему состоянию миграций
+Returns an array with current migrations state
 ```
  [
       [
@@ -85,26 +97,26 @@ ALTER TABLE posts   DROP COLUMN slug;
       ],
  ]
 ```
-Где CODE:
-*   Y - выполнена
-*   D - требует отката (в текущей ветке ее нет)
-*   A - в очереди
+Where CODE is:
+* **Y** - applied migration
+* **D** - have to rollback (no this migration in the current branch/revision)
+* **A** - not applied yet, next to be run
 
 
 ### Migrate - `\Blade\Migrations\Operation\MigrateOperation`
 ```
     $op = new \Blade\Migrations\Operation\MigrateOperation($service);
 
-    // Передать логгер в миграцию для вывода данных
+    // Set logger for output
     $op->setLogger(\Psr\Log\LoggerInterface $logger);
-    
-    $op->setAuto(bool); // Автооткат отсутствющих в текущей ветке миграций (есть в базе, но нет на диске)
-    $op->setForce(bool); // Спрашивать подтверждение
-    $op->setTestRollback(bool); // Протестирововать откат миграции в режиме UP-DOWN-UP
+
+    $op->setAuto(bool); // Auto-migrate all - rollback all D-migrations and appply all А-migrations
+    $op->setForce(bool); // Apply the migration without a prompt
+    $op->setTestRollback(bool); // rollback testing: UP-DOWN-UP
 
     /**
-     * @param $confirmationCallback - функция, которая спросит подтверждение у пользователя и вернет true/false
-     * @param $migrationName - Название миграции. Если указано, принудительно запустит ее вне очереди
+     * @param $confirmationCallback - Function, which asks for a prompt and returns true/false
+     * @param $migrationName - Concrete migration name
      */
     $op->run(callable $confirmationCallback($migrationTitle), $migrationName = null);
 ```
@@ -114,27 +126,27 @@ ALTER TABLE posts   DROP COLUMN slug;
 ```
     $op = new \Blade\Migrations\Operation\RollbackOperation($service);
 
-    // Передать логгер в миграцию для вывода данных
+    // Set logger for output
     $op->setLogger(\Psr\Log\LoggerInterface $logger);
 
-    $op->setForce(bool); // Спрашивать подтверждение
+    $op->setForce(bool);
 
     /**
-     * @param $confirmationCallback - функция, которая спросит подтверждение у пользователя и вернет true/false
-     * @param $migrationId - ID миграции в базе. Если указано, принудительно откатит ее вне очереди
-     * @param $loadFromFile - Загрузить миграцию из файла, а не из БД (например, если в базу попала ошибка)
+     * @param $confirmationCallback - Function, which asks for a prompt and returns true/false
+     * @param $migrationId - Database migration ID
+     * @param $loadFromFile - Rollback migration with commands taken from migration file, not from DB (if saved version contains error)
      */
     $op->run(callable $confirmationCallback($migrationTitle), $migrationId = null, $loadFromFile = false);
 ```
 
-### Создать миграцию - `\Blade\Migrations\Operation\MakeOperation`
+### Make migration file - `\Blade\Migrations\Operation\MakeOperation`
 ```
     $op = new \Blade\Migrations\Operation\MakeOperation($repoFile)
     $op->run($migrationFileName);
 ```
 
 ### Install - `\Blade\Migrations\Repository\DbRepository`
-Создать таблицу миграций в Базе
+Create migration table
 ```
     $repoDb->install();
 ```
