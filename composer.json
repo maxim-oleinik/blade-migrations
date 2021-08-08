@@ -13,7 +13,7 @@
     "php": "7.*",
     "maxim-oleinik/blade-database": "^0.3.0",
     "psr/log": "~1.0",
-    "symfony/finder": "2.*|3.*|4.*"
+    "symfony/finder": "2.*|3.*|4.*|5.*"
   },
   "require-dev": {
     "phpunit/phpunit": "6.*"
