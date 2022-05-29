@@ -215,7 +215,7 @@ abstract class BaseAcceptanceScenarioTest extends \PHPUnit\Framework\TestCase
             $row = $this->_prepareStatusRow($row);
         }
 
-        $this->assertEquals($expected, $actual, $message);
+        $this->assertEquals($expected, $actual, (string)$message);
 
     }
 
